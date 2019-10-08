@@ -9,7 +9,6 @@
 package cn.wildfirechat.pojos;
 
 
-import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
 import io.netty.util.internal.StringUtil;
 
@@ -28,26 +27,34 @@ public class InputCreateChannel {
 
     public WFCMessage.ChannelInfo toProtoChannelInfo() {
         WFCMessage.ChannelInfo.Builder builder = WFCMessage.ChannelInfo.newBuilder().setOwner(owner);
-        if (!StringUtil.isNullOrEmpty(name))
+        if (!StringUtil.isNullOrEmpty(name)) {
             builder = builder.setName(name);
-        if (!StringUtil.isNullOrEmpty(targetId))
+        }
+        if (!StringUtil.isNullOrEmpty(targetId)) {
             builder = builder.setTargetId(targetId);
-        if (!StringUtil.isNullOrEmpty(callback))
+        }
+        if (!StringUtil.isNullOrEmpty(callback)) {
             builder = builder.setCallback(callback);
-        if (!StringUtil.isNullOrEmpty(portrait))
+        }
+        if (!StringUtil.isNullOrEmpty(portrait)) {
             builder = builder.setPortrait(portrait);
+        }
         builder = builder.setAutomatic(auto);
-        if (!StringUtil.isNullOrEmpty(secret))
+        if (!StringUtil.isNullOrEmpty(secret)) {
             builder = builder.setSecret(secret);
-        if (!StringUtil.isNullOrEmpty(desc))
+        }
+        if (!StringUtil.isNullOrEmpty(desc)) {
             builder = builder.setDesc(desc);
+        }
         builder = builder.setStatus(status);
-        if (!StringUtil.isNullOrEmpty(extra))
+        if (!StringUtil.isNullOrEmpty(extra)) {
             builder = builder.setExtra(extra);
-        if (!StringUtil.isNullOrEmpty(name))
+        }
+        if (!StringUtil.isNullOrEmpty(name)) {
             builder = builder.setUpdateDt(updateDt);
-        else
+        } else {
             builder = builder.setUpdateDt(System.currentTimeMillis());
+        }
 
         return builder.build();
     }

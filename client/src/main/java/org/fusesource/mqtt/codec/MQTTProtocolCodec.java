@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,7 +34,7 @@ public class MQTTProtocolCodec extends AbstractProtocolCodec {
 
     private static final BufferPools BUFFER_POOLS = new BufferPools();
 
-    private int maxMessageLength = 1024*1024*100;
+    private int maxMessageLength = 1024 * 1024 * 100;
 
     public MQTTProtocolCodec() {
         this.bufferPools = BUFFER_POOLS;
@@ -54,7 +54,7 @@ public class MQTTProtocolCodec extends AbstractProtocolCodec {
         nextWriteBuffer.write(frame.header());
 
         int remaining = 0;
-        for(Buffer buffer : frame.buffers) {
+        for (Buffer buffer : frame.buffers) {
             remaining += buffer.length;
         }
         do {
@@ -65,7 +65,7 @@ public class MQTTProtocolCodec extends AbstractProtocolCodec {
             }
             nextWriteBuffer.write(digit);
         } while (remaining > 0);
-        for(Buffer buffer : frame.buffers) {
+        for (Buffer buffer : frame.buffers) {
             nextWriteBuffer.write(buffer.data, buffer.offset, buffer.length);
         }
     }
@@ -76,15 +76,16 @@ public class MQTTProtocolCodec extends AbstractProtocolCodec {
     }
 
     private final Action readHeader = new Action() {
+        @Override
         public MQTTFrame apply() throws IOException {
             int length = readLength();
-            if( length >= 0 ) {
-                if( length > maxMessageLength) {
+            if (length >= 0) {
+                if (length > maxMessageLength) {
                     throw new IOException("The maximum message length was exceeded");
                 }
                 byte header = readBuffer.get(readStart);
                 readStart = readEnd;
-                if( length > 0 ) {
+                if (length > 0) {
                     nextDecodeAction = readBody(header, length);
                 } else {
                     return new MQTTFrame().header(header);
@@ -95,17 +96,17 @@ public class MQTTProtocolCodec extends AbstractProtocolCodec {
     };
 
     private int readLength() throws IOException {
-        readEnd = readStart+2; // Header is at least 2 bytes..
+        readEnd = readStart + 2; // Header is at least 2 bytes..
         int limit = readBuffer.position();
         int length = 0;
         int multiplier = 1;
         byte digit;
 
-        while (readEnd-1 < limit) {
+        while (readEnd - 1 < limit) {
             // last byte is part of the encoded length..
-            digit = readBuffer.get(readEnd-1);
+            digit = readBuffer.get(readEnd - 1);
             length += (digit & 0x7F) * multiplier;
-            if( (digit & 0x80) == 0 ) {
+            if ((digit & 0x80) == 0) {
                 return length;
             }
 
@@ -118,6 +119,7 @@ public class MQTTProtocolCodec extends AbstractProtocolCodec {
 
     Action readBody(final byte header, final int length) {
         return new Action() {
+            @Override
             public MQTTFrame apply() throws IOException {
                 int limit = readBuffer.position();
                 if ((limit - readStart) < length) {

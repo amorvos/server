@@ -16,11 +16,6 @@
 
 package io.moquette.server;
 
-import java.util.NoSuchElementException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.moquette.server.netty.AutoFlushHandler;
 import io.moquette.server.netty.NettyUtils;
 import io.moquette.server.netty.metrics.BytesMetrics;
@@ -28,6 +23,12 @@ import io.moquette.server.netty.metrics.BytesMetricsHandler;
 import io.moquette.server.netty.metrics.MessageMetrics;
 import io.moquette.server.netty.metrics.MessageMetricsHandler;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Value object to maintain the information of single connection, like ClientID, Channel, and clean
@@ -65,13 +66,13 @@ public class ConnectionDescriptor {
     public void setupAutoFlusher(int flushIntervalMs) {
         try {
             this.channel.pipeline().addAfter(
-                    "idleEventHandler",
-                    "autoFlusher",
-                    new AutoFlushHandler(flushIntervalMs, TimeUnit.MILLISECONDS));
+                "idleEventHandler",
+                "autoFlusher",
+                new AutoFlushHandler(flushIntervalMs, TimeUnit.MILLISECONDS));
         } catch (NoSuchElementException nseex) {
             // the idleEventHandler is not present on the pipeline
             this.channel.pipeline()
-                    .addFirst("autoFlusher", new AutoFlushHandler(flushIntervalMs, TimeUnit.MILLISECONDS));
+                .addFirst("autoFlusher", new AutoFlushHandler(flushIntervalMs, TimeUnit.MILLISECONDS));
         }
     }
 
@@ -105,18 +106,18 @@ public class ConnectionDescriptor {
 
     public boolean assignState(ConnectionState expected, ConnectionState newState) {
         LOG.debug(
-                "Updating state of connection descriptor. MqttClientId = {}, expectedState = {}, newState = {}.",
-                clientID,
-                expected,
-                newState);
+            "Updating state of connection descriptor. MqttClientId = {}, expectedState = {}, newState = {}.",
+            clientID,
+            expected,
+            newState);
         boolean retval = channelState.compareAndSet(expected, newState);
         if (!retval) {
             LOG.error(
-                    "Unable to update state of connection descriptor."
+                "Unable to update state of connection descriptor."
                     + " MqttclientId = {}, expectedState = {}, newState = {}.",
-                    clientID,
-                    expected,
-                    newState);
+                clientID,
+                expected,
+                newState);
         }
         return retval;
     }
@@ -124,20 +125,23 @@ public class ConnectionDescriptor {
     @Override
     public String toString() {
         return "ConnectionDescriptor{" + "clientID=" + clientID + ", state="
-                + channelState.get() + '}';
+            + channelState.get() + '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
         ConnectionDescriptor that = (ConnectionDescriptor) o;
 
-        if (clientID != null ? !clientID.equals(that.clientID) : that.clientID != null)
+        if (clientID != null ? !clientID.equals(that.clientID) : that.clientID != null) {
             return false;
+        }
         return !(channel != null ? !channel.equals(that.channel) : that.channel != null);
     }
 

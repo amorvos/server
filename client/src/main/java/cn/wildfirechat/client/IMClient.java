@@ -14,9 +14,13 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.hawtbuf.UTF8Buffer;
-import org.fusesource.mqtt.client.*;
+import org.fusesource.mqtt.client.Callback;
+import org.fusesource.mqtt.client.CallbackConnection;
+import org.fusesource.mqtt.client.Listener;
+import org.fusesource.mqtt.client.MQTT;
+import org.fusesource.mqtt.client.QoS;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -40,7 +44,7 @@ public class IMClient implements Listener {
 
     protected String mqttServerIp;
     protected long mqttServerPort;
-    private static byte[] commonSecret= {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x78,0x79,0x7A,0x7B,0x7C,0x7D,0x7E,0x7F};
+    private static byte[] commonSecret = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E, 0x7F};
     protected String privateSecret;
 
     private long messageHead;
@@ -50,6 +54,7 @@ public class IMClient implements Listener {
 
     public interface ReceiveMessageCallback {
         void onReceiveMessages(List<WFCMessage.Message> messageList, boolean hasMore);
+
         void onRecallMessage(long messageUid);
     }
 
@@ -59,6 +64,7 @@ public class IMClient implements Listener {
 
     public interface SendMessageCallback {
         void onSuccess(long messageUid, long timestamp);
+
         void onFailure(int errorCode);
     }
 
@@ -86,11 +92,11 @@ public class IMClient implements Listener {
 
 
     public void connect() {
-        if(route(userId, token)) {
+        if (route(userId, token)) {
             try {
                 mqtt.setHost("tcp://" + mqttServerIp + ":" + mqttServerPort);
                 mqtt.setVersion("3.1.1");
-                mqtt.setKeepAlive((short)180);
+                mqtt.setKeepAlive((short) 180);
 
                 mqtt.setClientId(clientId);
                 mqtt.setConnectAttemptsMax(100);
@@ -106,7 +112,7 @@ public class IMClient implements Listener {
 
                 //connecting
                 connectionStatus = ConnectionStatus_Connecting;
-                if(connectionStatusCallback != null) {
+                if (connectionStatusCallback != null) {
                     connectionStatusCallback.onConnectionStatusChanged(connectionStatus);
                 }
 
@@ -127,7 +133,7 @@ public class IMClient implements Listener {
                         System.out.println("on connect success");
                         //connected
                         connectionStatus = ConnectionStatus_Connected;
-                        if(connectionStatusCallback != null) {
+                        if (connectionStatusCallback != null) {
                             connectionStatusCallback.onConnectionStatusChanged(connectionStatus);
                         }
                     }
@@ -136,7 +142,7 @@ public class IMClient implements Listener {
                     public void onFailure(Throwable value) {
                         System.out.println("on connect failure");
                         connectionStatus = ConnectionStatus_Unconnected;
-                        if(connectionStatusCallback != null) {
+                        if (connectionStatusCallback != null) {
                             connectionStatusCallback.onConnectionStatusChanged(connectionStatus);
                         }
                     }
@@ -152,6 +158,7 @@ public class IMClient implements Listener {
     public void disconnect(boolean clearSession, final Callback<Void> onComplete) {
         this.connection.disconnect(clearSession, onComplete);
     }
+
     public void sendMessage(WFCMessage.Conversation conversation, WFCMessage.MessageContent messageContent, final SendMessageCallback callback) {
         WFCMessage.Message message = WFCMessage.Message.newBuilder().setConversation(conversation).setContent(messageContent).setFromUser(userId).build();
         byte[] data = message.toByteArray();
@@ -160,13 +167,13 @@ public class IMClient implements Listener {
             @Override
             public void onSuccess(byte[] value) {
                 if (value[0] == 0) {
-                    byte[] data = new byte[value.length-1];
+                    byte[] data = new byte[value.length - 1];
                     for (int i = 0; i < data.length; i++) {
-                        data[i] = value[i+1];
+                        data[i] = value[i + 1];
                     }
 
                     data = AES.AESDecrypt(data, privateSecret, true);
-                    ByteBuffer buffer = ByteBuffer.wrap(data, 0,16);
+                    ByteBuffer buffer = ByteBuffer.wrap(data, 0, 16);
 
                     long messageUid = buffer.getLong();
                     long timestamp = buffer.getLong();
@@ -185,7 +192,7 @@ public class IMClient implements Listener {
 
     protected boolean route(String userId, String token) {
         HttpPost httpPost;
-        try{
+        try {
             HttpClient httpClient = HttpClientBuilder.create().build();
             httpPost = new HttpPost("http://" + host + ":" + port + "/route");
             InputRoute inputRoute = new InputRoute();
@@ -216,20 +223,20 @@ public class IMClient implements Listener {
 
 
             HttpResponse response = httpClient.execute(httpPost);
-            if(response != null){
+            if (response != null) {
                 if (response.getStatusLine().getStatusCode() != 200) {
                     System.out.println("Http response error {" + response.getStatusLine().getStatusCode() + "}");
                     return false;
                 }
                 HttpEntity resEntity = response.getEntity();
-                if(resEntity != null){
+                if (resEntity != null) {
                     try {
                         byte[] bytes = new byte[resEntity.getContent().available()];
                         resEntity.getContent().read(bytes);
                         if (bytes[0] == 0) {
-                            byte[] bytes1 = new byte[bytes.length -1];
+                            byte[] bytes1 = new byte[bytes.length - 1];
                             for (int i = 0; i < bytes1.length; i++) {
-                                bytes1[i] = bytes[i+1];
+                                bytes1[i] = bytes[i + 1];
                             }
                             byte[] rawData = AES.AESDecrypt(bytes1, privateSecret, true);
                             WFCMessage.RouteResponse routeResponse = WFCMessage.RouteResponse.parseFrom(rawData);
@@ -250,7 +257,7 @@ public class IMClient implements Listener {
             } else {
                 System.out.println("Http response nil");
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         return false;
@@ -260,7 +267,7 @@ public class IMClient implements Listener {
     public void onConnected() {
         System.out.println("onConnected");
         connectionStatus = ConnectionStatus_Connecting;
-        if(connectionStatusCallback != null) {
+        if (connectionStatusCallback != null) {
             connectionStatusCallback.onConnectionStatusChanged(connectionStatus);
         }
     }
@@ -269,7 +276,7 @@ public class IMClient implements Listener {
     public void onDisconnected() {
         System.out.println("onDisconnected");
         connectionStatus = ConnectionStatus_Unconnected;
-        if(connectionStatusCallback != null) {
+        if (connectionStatusCallback != null) {
             connectionStatusCallback.onConnectionStatusChanged(connectionStatus);
         }
     }
@@ -284,7 +291,7 @@ public class IMClient implements Listener {
                 WFCMessage.PullMessageRequest request = WFCMessage.PullMessageRequest.newBuilder().setId(messageHead).setType(notifyMessage.getType()).build();
                 byte[] data = request.toByteArray();
                 data = AES.AESEncrypt(data, privateSecret);
-                connection.publish("MP", data, QoS.AT_LEAST_ONCE, false, new Callback<byte[]>(){
+                connection.publish("MP", data, QoS.AT_LEAST_ONCE, false, new Callback<byte[]>() {
                     @Override
                     public void onSuccess(byte[] value) {
                         if (value == null || value.length == 0) {
@@ -297,7 +304,7 @@ public class IMClient implements Listener {
 
                         byte[] data = new byte[value.length - 1];
                         for (int i = 0; i < data.length; i++) {
-                            data[i] = value[i+1];
+                            data[i] = value[i + 1];
                         }
 
                         try {
@@ -341,7 +348,7 @@ public class IMClient implements Listener {
     @Override
     public void onFailure(Throwable value) {
         System.out.println("onDisconnected" + value.toString());
-        if(connectionStatusCallback != null) {
+        if (connectionStatusCallback != null) {
             connectionStatusCallback.onConnectionStatusChanged(ConnectionStatus_Unconnected);
         }
     }

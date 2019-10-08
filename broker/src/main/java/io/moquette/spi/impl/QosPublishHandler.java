@@ -16,12 +16,12 @@
 
 package io.moquette.spi.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.moquette.server.netty.NettyUtils;
 import io.moquette.spi.impl.subscriptions.Topic;
 import io.moquette.spi.security.IAuthorizator;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 abstract class QosPublishHandler {
 

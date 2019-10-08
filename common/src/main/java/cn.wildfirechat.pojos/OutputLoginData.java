@@ -8,8 +8,6 @@
 
 package cn.wildfirechat.pojos;
 
-import java.util.List;
-
 public class OutputLoginData {
     private String userId;
     private String token;

@@ -34,15 +34,15 @@ public final class MqttConnectVariableHeader {
     private final int keepAliveTimeSeconds;
 
     public MqttConnectVariableHeader(
-            String name,
-            int version,
-            boolean hasUserName,
-            boolean hasPassword,
-            boolean isWillRetain,
-            int willQos,
-            boolean isWillFlag,
-            boolean isCleanSession,
-            int keepAliveTimeSeconds) {
+        String name,
+        int version,
+        boolean hasUserName,
+        boolean hasPassword,
+        boolean isWillRetain,
+        int willQos,
+        boolean isWillFlag,
+        boolean isCleanSession,
+        int keepAliveTimeSeconds) {
         this.name = name;
         this.version = version;
         this.hasUserName = hasUserName;

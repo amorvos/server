@@ -8,10 +8,10 @@
 
 package io.moquette.imhandler;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.WFCMessage;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 import java.util.List;
@@ -20,11 +20,11 @@ import java.util.List;
 public class FriendRequestPullHandler extends IMHandler<WFCMessage.Version> {
     @Override
     public ErrorCode action(ByteBuf ackPayload, String clientID, String fromUser, boolean isAdmin, WFCMessage.Version request, Qos1PublishHandler.IMCallback callback) {
-            List<WFCMessage.FriendRequest> friendDatas = m_messagesStore.getFriendRequestList(fromUser, request.getVersion());
-            WFCMessage.GetFriendRequestResult.Builder builder = WFCMessage.GetFriendRequestResult.newBuilder();
-            builder.addAllEntry(friendDatas);
-            byte[] data = builder.build().toByteArray();
-            ackPayload.ensureWritable(data.length).writeBytes(data);
-            return ErrorCode.ERROR_CODE_SUCCESS;
+        List<WFCMessage.FriendRequest> friendDatas = m_messagesStore.getFriendRequestList(fromUser, request.getVersion());
+        WFCMessage.GetFriendRequestResult.Builder builder = WFCMessage.GetFriendRequestResult.newBuilder();
+        builder.addAllEntry(friendDatas);
+        byte[] data = builder.build().toByteArray();
+        ackPayload.ensureWritable(data.length).writeBytes(data);
+        return ErrorCode.ERROR_CODE_SUCCESS;
     }
 }

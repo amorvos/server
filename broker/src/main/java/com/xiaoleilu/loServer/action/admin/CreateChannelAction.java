@@ -10,8 +10,8 @@ package com.xiaoleilu.loServer.action.admin;
 
 import cn.wildfirechat.common.APIPath;
 import cn.wildfirechat.common.ErrorCode;
-import cn.wildfirechat.pojos.*;
-import cn.wildfirechat.proto.WFCMessage;
+import cn.wildfirechat.pojos.InputCreateChannel;
+import cn.wildfirechat.pojos.OutputCreateChannel;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
@@ -26,13 +26,12 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
 import win.liyufan.im.IMTopic;
-import win.liyufan.im.UUIDGenerator;
 
 import java.util.concurrent.Executor;
 
 @Route(APIPath.Create_Channel)
 @HttpMethod("POST")
-public class CreateChannelAction extends AdminAction {
+public class CreateChannelAction extends AbstractAdminAction {
 
     @Override
     public boolean isTransactionAction() {
@@ -47,7 +46,7 @@ public class CreateChannelAction extends AdminAction {
                 && !StringUtil.isNullOrEmpty(inputCreateChannel.getName())) {
 
 
-                if(StringUtil.isNullOrEmpty(inputCreateChannel.getTargetId())) {
+                if (StringUtil.isNullOrEmpty(inputCreateChannel.getTargetId())) {
                     inputCreateChannel.setTargetId(messagesStore.getShortUUID());
                 }
 

@@ -14,7 +14,7 @@ import java.util.List;
 public class InputGroupBase {
     public String operator;
     public List<Integer> to_lines;
-    public MessagePayload  notify_message;
+    public MessagePayload notify_message;
 
     public String getOperator() {
         return operator;

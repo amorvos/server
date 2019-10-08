@@ -44,6 +44,7 @@ public class RestResult {
     public void setErrorCode(ErrorCode errorCode) {
         setCode(errorCode.code);
     }
+
     public int getCode() {
         return code;
     }

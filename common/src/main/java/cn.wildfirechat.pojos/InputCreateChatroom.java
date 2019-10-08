@@ -40,7 +40,7 @@ public class InputCreateChatroom {
 
         if (state == null || state == 0) {
             builder.setState(ProtoConstants.ChatroomState.Chatroom_State_Normal);
-        } else if(state == 1) {
+        } else if (state == 1) {
             builder.setState(ProtoConstants.ChatroomState.Chatroom_State_NotStart);
         } else {
             builder.setState(ProtoConstants.ChatroomState.Chatroom_State_End);
@@ -48,6 +48,7 @@ public class InputCreateChatroom {
 
         return builder.build();
     }
+
     public InputCreateChatroom() {
     }
 

@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -71,7 +71,7 @@ import static org.fusesource.hawtdispatch.Dispatch.createQueue;
  * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
 public class CallbackConnection {
-    
+
     private static class Request {
         private final MQTTFrame frame;
         private final short id;
@@ -84,17 +84,26 @@ public class CallbackConnection {
         }
     }
 
-    private static final ExtendedListener DEFAULT_LISTENER = new ExtendedListener(){
+    private static final ExtendedListener DEFAULT_LISTENER = new ExtendedListener() {
+        @Override
         public void onConnected() {
         }
+
+        @Override
         public void onDisconnected() {
         }
+
+        @Override
         public void onPublish(UTF8Buffer utf8Buffer, Buffer buffer, Runnable runnable) {
             this.onFailure(createListenerNotSetError());
         }
+
+        @Override
         public void onPublish(UTF8Buffer topic, Buffer body, Callback<Callback<byte[]>> ack) {
             this.onFailure(createListenerNotSetError());
         }
+
+        @Override
         public void onFailure(Throwable value) {
             Thread.currentThread().getUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), value);
         }
@@ -121,7 +130,7 @@ public class CallbackConnection {
 
     public CallbackConnection(MQTT mqtt) {
         this.mqtt = mqtt;
-        if(this.mqtt.dispatchQueue == null) {
+        if (this.mqtt.dispatchQueue == null) {
             this.queue = createQueue("mqtt client");
         } else {
             this.queue = this.mqtt.dispatchQueue;
@@ -129,9 +138,9 @@ public class CallbackConnection {
     }
 
     public void connect(final Callback<byte[]> cb) {
-        assert cb !=null : "Callback should not be null.";
+        assert cb != null : "Callback should not be null.";
 
-        if( transport!=null ) {
+        if (transport != null) {
             cb.onFailure(new IllegalStateException("Already connected"));
             return;
         }
@@ -148,6 +157,7 @@ public class CallbackConnection {
         try {
             // And reconnect.
             createTransport(new LoginHandler(new Callback<byte[]>() {
+                @Override
                 public void onSuccess(byte[] value) {
 
                     mqtt.tracer.debug("Restoring MQTT connection state");
@@ -181,6 +191,7 @@ public class CallbackConnection {
 
                 }
 
+                @Override
                 public void onFailure(Throwable value) {
                     handleFatalFailure(value);
                 }
@@ -189,20 +200,21 @@ public class CallbackConnection {
             handleFatalFailure(e);
         }
     }
+
     void handleSessionFailure(Throwable error) {
         // Socket failure, should we try to reconnect?
-        if( !disconnected && (mqtt.reconnectAttemptsMax<0 || reconnects < mqtt.reconnectAttemptsMax ) ) {
+        if (!disconnected && (mqtt.reconnectAttemptsMax < 0 || reconnects < mqtt.reconnectAttemptsMax)) {
 
             mqtt.tracer.debug("Reconnecting transport");
             // Cleanup the previous transport.
-            if(heartBeatMonitor!=null) {
+            if (heartBeatMonitor != null) {
                 heartBeatMonitor.stop();
                 heartBeatMonitor = null;
             }
             final Transport t = transport;
             transport = null;
 
-            if(t!=null) {
+            if (t != null) {
                 t.stop(new Task() {
                     @Override
                     public void run() {
@@ -222,15 +234,15 @@ public class CallbackConnection {
 
     void reconnect(final Callback<Transport> onConnect) {
         long reconnectDelay = mqtt.reconnectDelay;
-        if( reconnectDelay> 0 && mqtt.reconnectBackOffMultiplier > 1.0 ) {
-            reconnectDelay = (long) Math.pow(mqtt.reconnectDelay*reconnects, mqtt.reconnectBackOffMultiplier);
+        if (reconnectDelay > 0 && mqtt.reconnectBackOffMultiplier > 1.0) {
+            reconnectDelay = (long) Math.pow(mqtt.reconnectDelay * reconnects, mqtt.reconnectBackOffMultiplier);
         }
         reconnectDelay = Math.min(reconnectDelay, mqtt.reconnectDelayMax);
         reconnects += 1;
         queue.executeAfter(reconnectDelay, TimeUnit.MILLISECONDS, new Task() {
             @Override
             public void run() {
-                if(disconnected) {
+                if (disconnected) {
                     onConnect.onFailure(createDisconnectedError());
                 } else {
                     try {
@@ -255,28 +267,28 @@ public class CallbackConnection {
         String scheme = mqtt.host.getScheme();
 
         final Transport transport;
-        if( "tcp".equals(scheme) ) {
+        if ("tcp".equals(scheme)) {
             transport = new TcpTransport();
-        }  else if( SslTransport.protocol(scheme)!=null ) {
+        } else if (SslTransport.protocol(scheme) != null) {
             SslTransport ssl = new SslTransport();
-            if( mqtt.sslContext == null ) {
+            if (mqtt.sslContext == null) {
                 mqtt.sslContext = SSLContext.getDefault();
             }
             ssl.setSSLContext(mqtt.sslContext);
             transport = ssl;
         } else {
-            throw new Exception("Unsupported URI scheme '"+scheme+"'");
+            throw new Exception("Unsupported URI scheme '" + scheme + "'");
         }
 
-        if( mqtt.blockingExecutor == null ) {
+        if (mqtt.blockingExecutor == null) {
             mqtt.blockingExecutor = MQTT.getBlockingThreadPool();
         }
         transport.setBlockingExecutor(mqtt.blockingExecutor);
         transport.setDispatchQueue(queue);
         transport.setProtocolCodec(new MQTTProtocolCodec());
 
-        if( transport instanceof TcpTransport ) {
-            TcpTransport tcp = (TcpTransport)transport;
+        if (transport instanceof TcpTransport) {
+            TcpTransport tcp = (TcpTransport) transport;
             tcp.setMaxReadRate(mqtt.maxReadRate);
             tcp.setMaxWriteRate(mqtt.maxWriteRate);
             tcp.setReceiveBufferSize(mqtt.receiveBufferSize);
@@ -286,11 +298,11 @@ public class CallbackConnection {
             tcp.connecting(mqtt.host, mqtt.localAddress);
         }
 
-        transport.setTransportListener(new DefaultTransportListener(){
+        transport.setTransportListener(new DefaultTransportListener() {
             @Override
             public void onTransportConnected() {
                 mqtt.tracer.debug("Transport connected");
-                if(disconnected) {
+                if (disconnected) {
                     onFailure(createDisconnectedError());
                 } else {
                     onConnect.onSuccess(transport);
@@ -304,7 +316,7 @@ public class CallbackConnection {
             }
 
             private void onFailure(final Throwable error) {
-                if(!transport.isClosed()) {
+                if (!transport.isClosed()) {
                     transport.stop(new Task() {
                         @Override
                         public void run() {
@@ -326,6 +338,7 @@ public class CallbackConnection {
             this.initialConnect = initialConnect;
         }
 
+        @Override
         public void onSuccess(final Transport transport) {
             transport.setTransportListener(new DefaultTransportListener() {
                 @Override
@@ -378,10 +391,10 @@ public class CallbackConnection {
                 }
             });
             transport.resumeRead();
-            if( mqtt.connect.clientId() == null ) {
-                String id = hex(transport.getLocalAddress())+Long.toHexString(System.currentTimeMillis()/1000);
-                if(id.length() > 23) {
-                    id = id.substring(0,23);
+            if (mqtt.connect.clientId() == null) {
+                String id = hex(transport.getLocalAddress()) + Long.toHexString(System.currentTimeMillis() / 1000);
+                if (id.length() > 23) {
+                    id = id.substring(0, 23);
                 }
                 mqtt.connect.clientId(utf8(id));
             }
@@ -389,20 +402,21 @@ public class CallbackConnection {
             boolean accepted = transport.offer(encoded);
             mqtt.tracer.onSend(encoded);
             mqtt.tracer.debug("Logging in");
-            assert accepted: "First frame should always be accepted by the transport";
-        }
-        
-        private boolean tryReconnect() {
-            if(initialConnect) {
-                return mqtt.connectAttemptsMax<0 || reconnects < mqtt.connectAttemptsMax;
-            }
-            
-            return mqtt.reconnectAttemptsMax<0 || reconnects < mqtt.reconnectAttemptsMax;
+            assert accepted : "First frame should always be accepted by the transport";
         }
 
+        private boolean tryReconnect() {
+            if (initialConnect) {
+                return mqtt.connectAttemptsMax < 0 || reconnects < mqtt.connectAttemptsMax;
+            }
+
+            return mqtt.reconnectAttemptsMax < 0 || reconnects < mqtt.reconnectAttemptsMax;
+        }
+
+        @Override
         public void onFailure(Throwable value) {
             // Socket failure, should we try to reconnect?
-            if( !disconnected && tryReconnect() ) {
+            if (!disconnected && tryReconnect()) {
                 reconnect(this);
             } else {
                 // nope.
@@ -411,10 +425,11 @@ public class CallbackConnection {
         }
     }
 
-    private boolean onRefillCalled =false;
+    private boolean onRefillCalled = false;
+
     public void onSessionEstablished(Transport transport) {
         this.transport = transport;
-        if( suspendCount.get() > 0 ) {
+        if (suspendCount.get() > 0) {
             this.transport.suspendRead();
         }
         this.transport.setTransportListener(new DefaultTransportListener() {
@@ -424,9 +439,10 @@ public class CallbackConnection {
                 mqtt.tracer.onReceive(frame);
                 processFrame(frame);
             }
+
             @Override
             public void onRefill() {
-                onRefillCalled =true;
+                onRefillCalled = true;
                 drainOverflow();
             }
 
@@ -436,7 +452,7 @@ public class CallbackConnection {
             }
         });
         pingedAt = 0;
-        if(mqtt.getKeepAlive()>0) {
+        if (mqtt.getKeepAlive() > 0) {
             heartBeatMonitor = new HeartBeatMonitor();
             heartBeatMonitor.setWriteInterval((mqtt.getKeepAlive() * 1000) / 2);
             heartBeatMonitor.setTransport(this.transport);
@@ -445,9 +461,9 @@ public class CallbackConnection {
                 @Override
                 public void run() {
                     // Don't care if the offer is rejected, just means we have data outbound.
-                    if(!disconnected && pingedAt==0) {
+                    if (!disconnected && pingedAt == 0) {
                         MQTTFrame encoded = new PINGREQ().encode();
-                        if(CallbackConnection.this.transport.offer(encoded)) {
+                        if (CallbackConnection.this.transport.offer(encoded)) {
                             mqtt.tracer.onSend(encoded);
                             final long now = System.currentTimeMillis();
                             final long suspends = suspendChanges.get();
@@ -471,7 +487,7 @@ public class CallbackConnection {
                             });
                         }
                     }
-                    
+
                 }
             });
             heartBeatMonitor.start();
@@ -488,9 +504,9 @@ public class CallbackConnection {
 
     public void resume() {
         suspendChanges.incrementAndGet();
-        if( suspendCount.decrementAndGet() == 0 && this.transport!=null ) {
+        if (suspendCount.decrementAndGet() == 0 && this.transport != null) {
             this.transport.resumeRead();
-            if(this.heartBeatMonitor!=null){
+            if (this.heartBeatMonitor != null) {
                 this.heartBeatMonitor.resumeRead();
             }
         }
@@ -498,9 +514,9 @@ public class CallbackConnection {
 
     public void suspend() {
         suspendChanges.incrementAndGet();
-        if( suspendCount.incrementAndGet() == 1 && this.transport!=null ) {
+        if (suspendCount.incrementAndGet() == 1 && this.transport != null) {
             this.transport.suspendRead();
-            if(this.heartBeatMonitor!=null){
+            if (this.heartBeatMonitor != null) {
                 this.heartBeatMonitor.suspendRead();
             }
         }
@@ -513,29 +529,36 @@ public class CallbackConnection {
     }
 
     public CallbackConnection listener(final Listener original) {
-        if( original instanceof ExtendedListener ) {
+        if (original instanceof ExtendedListener) {
             this.listener = (ExtendedListener) original;
         } else {
             this.listener = new ExtendedListener() {
+                @Override
                 public void onPublish(UTF8Buffer topic, Buffer body, final Callback<Callback<byte[]>> ack) {
                     original.onPublish(topic, body, new Runnable() {
+                        @Override
                         public void run() {
                             ack.onSuccess(null);
                         }
                     });
                 }
+
+                @Override
                 public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
                     original.onPublish(topic, body, ack);
                 }
 
+                @Override
                 public void onConnected() {
                     original.onConnected();
                 }
 
+                @Override
                 public void onDisconnected() {
                     original.onDisconnected();
                 }
 
+                @Override
                 public void onFailure(Throwable value) {
                     original.onFailure(value);
                 }
@@ -555,8 +578,8 @@ public class CallbackConnection {
     }
 
     public void disconnect(boolean clearSession, final Callback<Void> onComplete) {
-        if( disconnected ) {
-            if(onComplete!=null){
+        if (disconnected) {
+            if (onComplete != null) {
                 onComplete.onSuccess(null);
             }
             return;
@@ -566,12 +589,14 @@ public class CallbackConnection {
         final short requestId = getNextMessageId();
         final Runnable stop = new Runnable() {
             private boolean executed = false;
+
+            @Override
             public void run() {
-                if(!executed) {
+                if (!executed) {
                     executed = true;
                     requests.remove(requestId);
 
-                    if(heartBeatMonitor!=null) {
+                    if (heartBeatMonitor != null) {
                         heartBeatMonitor.stop();
                         heartBeatMonitor = null;
                     }
@@ -587,30 +612,34 @@ public class CallbackConnection {
                 }
             }
         };
-        
+
         Callback<Void> cb = new Callback<Void>() {
+            @Override
             public void onSuccess(Void v) {
                 // To make sure DISCONNECT has been flushed out to the socket
                 onRefillCalled = false;
                 refiller = new Runnable() {
+                    @Override
                     public void run() {
-                        if(onRefillCalled) {
+                        if (onRefillCalled) {
                             stop.run();
                         }
                     }
                 };
-                if(transport != null){
+                if (transport != null) {
                     transport.flush();
                 }
             }
+
+            @Override
             public void onFailure(Throwable value) {
                 stop.run();
             }
         };
-        
+
         // Pop the frame into a request so it we get notified
         // of any failures so we continue to stop the transport.
-        if(transport!=null) {
+        if (transport != null) {
             MQTTFrame frame = new DISCONNECT().encode().dup(clearSession);
             send(new Request(getNextMessageId(), frame, cb));
         } else {
@@ -620,17 +649,18 @@ public class CallbackConnection {
 
     /**
      * Kills the connection without a graceful disconnect.
+     *
      * @param onComplete
      */
     public void kill(final Callback<Void> onComplete) {
-        if( disconnected ) {
-            if(onComplete!=null){
+        if (disconnected) {
+            if (onComplete != null) {
                 onComplete.onSuccess(null);
             }
             return;
         }
         disconnected = true;
-        if(heartBeatMonitor!=null) {
+        if (heartBeatMonitor != null) {
             heartBeatMonitor.stop();
             heartBeatMonitor = null;
         }
@@ -651,7 +681,7 @@ public class CallbackConnection {
 
     public void publish(UTF8Buffer topic, Buffer payload, QoS qos, boolean retain, Callback<byte[]> cb) {
         queue.assertExecuting();
-        if( disconnected ) {
+        if (disconnected) {
             cb.onFailure(createDisconnectedError());
             return;
         }
@@ -661,24 +691,24 @@ public class CallbackConnection {
     }
 
     public void subscribe(final Topic[] topics, Callback<byte[]> cb) {
-        if(topics==null) {
+        if (topics == null) {
             throw new IllegalArgumentException("topics must not be null");
         }
         queue.assertExecuting();
-        if( disconnected ) {
+        if (disconnected) {
             cb.onFailure(createDisconnectedError());
             return;
         }
-        if( listener == DEFAULT_LISTENER ) {
+        if (listener == DEFAULT_LISTENER) {
             cb.onFailure(createListenerNotSetError());
         } else {
-            send(new SUBSCRIBE().topics(topics), new ProxyCallback<byte[]>(cb){
+            send(new SUBSCRIBE().topics(topics), new ProxyCallback<byte[]>(cb) {
                 @Override
                 public void onSuccess(byte[] value) {
                     for (Topic topic : topics) {
                         activeSubs.put(topic.name(), topic.qos());
                     }
-                    if(next!=null) {
+                    if (next != null) {
                         next.onSuccess(value);
                     }
                 }
@@ -688,17 +718,17 @@ public class CallbackConnection {
 
     public void unsubscribe(final UTF8Buffer[] topics, Callback<Void> cb) {
         queue.assertExecuting();
-        if( disconnected ) {
+        if (disconnected) {
             cb.onFailure(createDisconnectedError());
             return;
         }
-        send(new UNSUBSCRIBE().topics(topics), new ProxyCallback(cb){
+        send(new UNSUBSCRIBE().topics(topics), new ProxyCallback(cb) {
             @Override
             public void onSuccess(Object value) {
                 for (UTF8Buffer topic : topics) {
                     activeSubs.remove(topic);
                 }
-                if(next!=null) {
+                if (next != null) {
                     next.onSuccess(value);
                 }
             }
@@ -707,7 +737,7 @@ public class CallbackConnection {
 
     private void send(Acked command, Callback cb) {
         short id = 0;
-        if(command.qos() != QoS.AT_MOST_ONCE) {
+        if (command.qos() != QoS.AT_MOST_ONCE) {
             id = getNextMessageId();
             command.messageId(id);
         }
@@ -715,23 +745,23 @@ public class CallbackConnection {
     }
 
     private void send(Request request) {
-        if( failure !=null ) {
-            if( request.cb!=null ) {
+        if (failure != null) {
+            if (request.cb != null) {
                 request.cb.onFailure(failure);
             }
         } else {
             // Put the request in the map before sending it over the wire. 
-            if(request.id!=0) {
+            if (request.id != 0) {
                 this.requests.put(request.id, request);
             }
 
-            if( overflow.isEmpty() && transport!=null && transport.offer(request.frame) ) {
+            if (overflow.isEmpty() && transport != null && transport.offer(request.frame)) {
                 mqtt.tracer.onSend(request.frame);
-                if(request.id==0) {
-                    if( request.cb!=null ) {
-                        ((Callback<Void>)request.cb).onSuccess(null);
+                if (request.id == 0) {
+                    if (request.cb != null) {
+                        ((Callback<Void>) request.cb).onSuccess(null);
                     }
-                    
+
                 }
             } else {
                 // Remove it from the request.
@@ -742,28 +772,29 @@ public class CallbackConnection {
     }
 
     private short nextMessageId = 1;
+
     private short getNextMessageId() {
         short rc = nextMessageId;
         nextMessageId++;
-        if(nextMessageId==0) {
-            nextMessageId=1;
+        if (nextMessageId == 0) {
+            nextMessageId = 1;
         }
         return rc;
     }
 
     private void drainOverflow() {
         queue.assertExecuting();
-        if( overflow.isEmpty() || transport==null ){
+        if (overflow.isEmpty() || transport == null) {
             return;
         }
         Request request;
-        while((request=overflow.peek())!=null) {
-            if( this.transport.offer(request.frame) ) {
+        while ((request = overflow.peek()) != null) {
+            if (this.transport.offer(request.frame)) {
                 mqtt.tracer.onSend(request.frame);
                 overflow.removeFirst();
-                if(request.id==0) {
-                    if( request.cb!=null ) {
-                        ((Callback<Void>)request.cb).onSuccess(null);
+                if (request.id == 0) {
+                    if (request.cb != null) {
+                        ((Callback<Void>) request.cb).onSuccess(null);
                     }
                 } else {
                     this.requests.put(request.id, request);
@@ -772,8 +803,8 @@ public class CallbackConnection {
                 break;
             }
         }
-        if( overflow.isEmpty() ) {
-            if( refiller!=null ) {
+        if (overflow.isEmpty()) {
+            if (refiller != null) {
                 try {
                     refiller.run();
                 } catch (Throwable e) {
@@ -786,13 +817,13 @@ public class CallbackConnection {
 
     private void completeRequest(short id, byte originalType, Object arg) {
         Request request = requests.remove(id);
-        if( request!=null ) {
-            assert originalType==request.frame.messageType();
-            if(request.cb!=null) {
-                if( arg==null ) {
-                    ((Callback<Void>)request.cb).onSuccess(null);
+        if (request != null) {
+            assert originalType == request.frame.messageType();
+            if (request.cb != null) {
+                if (arg == null) {
+                    ((Callback<Void>) request.cb).onSuccess(null);
                 } else {
-                    ((Callback<Object>)request.cb).onSuccess(arg);
+                    ((Callback<Object>) request.cb).onSuccess(arg);
                 }
             }
         } else {
@@ -802,36 +833,36 @@ public class CallbackConnection {
 
     private void processFrame(MQTTFrame frame) {
         try {
-            switch(frame.messageType()) {
+            switch (frame.messageType()) {
                 case PUBLISH.TYPE: {
                     PUBLISH publish = new PUBLISH().decode(frame);
                     toReceiver(publish);
                     break;
                 }
-                case PUBREL.TYPE:{
+                case PUBREL.TYPE: {
                     PUBREL ack = new PUBREL().decode(frame);
                     Callback<byte[]> onRel = processed.remove(ack.messageId());
                     PUBCOMP response = new PUBCOMP();
                     response.messageId(ack.messageId());
                     send(new Request(0, response.encode(), null));
-                    if( onRel!=null ) {
+                    if (onRel != null) {
                         onRel.onSuccess(null);
                     }
                     break;
                 }
-                case PUBACK.TYPE:{
+                case PUBACK.TYPE: {
                     PUBACK ack = new PUBACK().decode(frame);
                     completeRequest(ack.messageId(), PUBLISH.TYPE, ack.payload);
                     break;
                 }
-                case PUBREC.TYPE:{
+                case PUBREC.TYPE: {
                     PUBREC ack = new PUBREC().decode(frame);
                     PUBREL response = new PUBREL();
                     response.messageId(ack.messageId());
                     send(new Request(0, response.encode(), null));
                     break;
                 }
-                case PUBCOMP.TYPE:{
+                case PUBCOMP.TYPE: {
                     PUBCOMP ack = new PUBCOMP().decode(frame);
                     completeRequest(ack.messageId(), PUBLISH.TYPE, null);
                     break;
@@ -851,7 +882,7 @@ public class CallbackConnection {
                     break;
                 }
                 default:
-                    throw new ProtocolException("Unexpected MQTT command type: "+frame.messageType());
+                    throw new ProtocolException("Unexpected MQTT command type: " + frame.messageType());
             }
         } catch (Throwable e) {
             handleFatalFailure(e);
@@ -861,26 +892,30 @@ public class CallbackConnection {
     static public final Task NOOP = Dispatch.NOOP;
 
     private void toReceiver(final PUBLISH publish) {
-        if( listener !=null ) {
+        if (listener != null) {
             try {
                 Callback<Callback<byte[]>> cb = null;
-                switch( publish.qos() ) {
+                switch (publish.qos()) {
                     case AT_LEAST_ONCE:
                         cb = new Callback<Callback<byte[]>>() {
+                            @Override
                             public void onSuccess(Callback<byte[]> value) {
                                 PUBACK response = new PUBACK();
                                 response.messageId(publish.messageId());
                                 send(new Request(0, response.encode(), null));
-                                if( value !=null ) {
+                                if (value != null) {
                                     value.onSuccess(null);
                                 }
                             }
+
+                            @Override
                             public void onFailure(Throwable value) {
                             }
                         };
                         break;
                     case EXACTLY_ONCE:
                         cb = new Callback<Callback<byte[]>>() {
+                            @Override
                             public void onSuccess(Callback<byte[]> value) {
                                 PUBREC response = new PUBREC();
                                 response.messageId(publish.messageId());
@@ -888,22 +923,25 @@ public class CallbackConnection {
                                 send(new Request(0, response.encode(), null));
                             }
 
+                            @Override
                             public void onFailure(Throwable value) {
                             }
                         };
                         // Looks like a dup delivery.. filter it out.
-                        if( processed.get(publish.messageId())!=null ) {
+                        if (processed.get(publish.messageId()) != null) {
                             return;
                         }
                         break;
                     case AT_MOST_ONCE:
                         cb = new Callback<Callback<byte[]>>() {
+                            @Override
                             public void onSuccess(Callback<byte[]> value) {
                                 if (value != null) {
                                     value.onSuccess(null);
                                 }
                             }
 
+                            @Override
                             public void onFailure(Throwable value) {
                             }
                         };
@@ -916,15 +954,15 @@ public class CallbackConnection {
     }
 
     private void handleFatalFailure(Throwable error) {
-        if( failure == null ) {
+        if (failure == null) {
             failure = error;
-            
+
             mqtt.tracer.debug("Fatal connection failure: %s", error);
             // Fail incomplete requests.
             ArrayList<Request> values = new ArrayList(requests.values());
             requests.clear();
             for (Request value : values) {
-                if( value.cb!= null ) {
+                if (value.cb != null) {
                     value.cb.onFailure(failure);
                 }
             }
@@ -932,12 +970,12 @@ public class CallbackConnection {
             ArrayList<Request> overflowEntries = new ArrayList<Request>(overflow);
             overflow.clear();
             for (Request entry : overflowEntries) {
-                if( entry.cb !=null ) {
+                if (entry.cb != null) {
                     entry.cb.onFailure(failure);
                 }
             }
-            
-            if( listener !=null && !disconnected ) {
+
+            if (listener != null && !disconnected) {
                 try {
                     listener.onFailure(failure);
                 } catch (Exception e) {
@@ -955,10 +993,10 @@ public class CallbackConnection {
         return (IllegalStateException) new IllegalStateException("Disconnected").fillInStackTrace();
     }
 
-    static private  String hex(SocketAddress address) {
-        if( address instanceof InetSocketAddress ) {
-            InetSocketAddress isa = (InetSocketAddress)address;
-            return HexSupport.toHexFromBuffer(new Buffer(isa.getAddress().getAddress()))+Integer.toHexString(isa.getPort());
+    static private String hex(SocketAddress address) {
+        if (address instanceof InetSocketAddress) {
+            InetSocketAddress isa = (InetSocketAddress) address;
+            return HexSupport.toHexFromBuffer(new Buffer(isa.getAddress().getAddress())) + Integer.toHexString(isa.getPort());
         }
         return "";
     }

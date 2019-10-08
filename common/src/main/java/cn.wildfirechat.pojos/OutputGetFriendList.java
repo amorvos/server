@@ -10,7 +10,6 @@ package cn.wildfirechat.pojos;
 
 
 import java.util.List;
-import java.util.Map;
 
 public class OutputGetFriendList {
     private List<String> friends;

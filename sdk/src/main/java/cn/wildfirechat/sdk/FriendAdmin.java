@@ -1,7 +1,8 @@
 package cn.wildfirechat.sdk;
 
 import cn.wildfirechat.common.APIPath;
-import cn.wildfirechat.pojos.*;
+import cn.wildfirechat.pojos.InputFriendRequest;
+import cn.wildfirechat.pojos.InputGetFriendList;
 import cn.wildfirechat.sdk.model.IMResult;
 import cn.wildfirechat.sdk.utilities.AdminHttpUtils;
 

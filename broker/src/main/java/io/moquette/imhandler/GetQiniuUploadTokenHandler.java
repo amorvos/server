@@ -8,13 +8,13 @@
 
 package io.moquette.imhandler;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.WFCMessage;
 import com.qiniu.util.Auth;
 import com.xiaoleilu.loServer.action.UploadFileAction;
 import io.moquette.server.config.MediaServerConfig;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 @Handler(IMTopic.GetQiniuUploadTokenTopic)

@@ -1,9 +1,13 @@
 package cn.wildfirechat.sdk;
 
 import cn.wildfirechat.common.APIPath;
-import cn.wildfirechat.pojos.*;
+import cn.wildfirechat.pojos.Conversation;
+import cn.wildfirechat.pojos.InputGetUserInfo;
+import cn.wildfirechat.pojos.InputOutputUserInfo;
+import cn.wildfirechat.pojos.MessagePayload;
+import cn.wildfirechat.pojos.SendMessageData;
+import cn.wildfirechat.pojos.SendMessageResult;
 import cn.wildfirechat.sdk.model.IMResult;
-import cn.wildfirechat.sdk.utilities.AdminHttpUtils;
 import cn.wildfirechat.sdk.utilities.RobotHttpUtils;
 
 public class RobotService {

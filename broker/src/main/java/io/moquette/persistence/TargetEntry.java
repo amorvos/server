@@ -19,6 +19,7 @@ public class TargetEntry {
         TARGET_TYPE_CHATROOM,
         TARGET_TYPE_MASTER_NODE,
     }
+
     public Type type;
     public String target;
 }

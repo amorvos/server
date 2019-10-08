@@ -16,13 +16,14 @@
 
 package io.moquette.spi.impl.subscriptions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Topic implements Serializable {
 
@@ -40,13 +41,13 @@ public class Topic implements Serializable {
         this.topic = topic;
     }
 
-    
+
     public String getTopic() {
-		return topic;
-	}
+        return topic;
+    }
 
 
-	public List<Token> getTokens() {
+    public List<Token> getTokens() {
         if (tokens == null) {
             try {
                 tokens = parseTopic(topic);
@@ -88,8 +89,8 @@ public class Topic implements Serializable {
                 // check that multi is the last symbol
                 if (i != splitted.length - 1) {
                     throw new ParseException(
-                            "Bad format of topic, the multi symbol (#) has to be the last one after a separator",
-                            i);
+                        "Bad format of topic, the multi symbol (#) has to be the last one after a separator",
+                        i);
                 }
                 res.add(Token.MULTI);
             } else if (s.contains("#")) {
@@ -107,8 +108,9 @@ public class Topic implements Serializable {
     }
 
     public boolean isValid() {
-        if (tokens == null)
+        if (tokens == null) {
             getTokens();
+        }
 
         return valid;
     }
@@ -116,8 +118,7 @@ public class Topic implements Serializable {
     /**
      * Verify if the 2 topics matching respecting the rules of MQTT Appendix A
      *
-     * @param subscriptionTopic
-     *            the topic filter of the subscription
+     * @param subscriptionTopic the topic filter of the subscription
      * @return true if the two topics match.
      */
     // TODO reimplement with iterators or with queues
@@ -176,7 +177,7 @@ public class Topic implements Serializable {
 
     /**
      * Factory method
-     * */
+     */
     public static Topic asTopic(String s) {
         return new Topic(s);
     }

@@ -17,42 +17,72 @@
 package io.moquette.spi.impl;
 
 import cn.wildfirechat.proto.WFCMessage;
-import io.moquette.persistence.RPCCenter;
 import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.messages.InterceptAcknowledgedMessage;
 import io.moquette.persistence.MemorySessionStore;
+import io.moquette.persistence.RPCCenter;
 import io.moquette.persistence.TargetEntry;
 import io.moquette.server.ConnectionDescriptor;
 import io.moquette.server.ConnectionDescriptorStore;
 import io.moquette.server.Server;
 import io.moquette.server.netty.NettyUtils;
-import io.moquette.spi.*;
+import io.moquette.spi.ClientSession;
+import io.moquette.spi.IMessagesStore;
 import io.moquette.spi.IMessagesStore.StoredMessage;
+import io.moquette.spi.ISessionsStore;
 import io.moquette.spi.impl.security.AES;
 import io.moquette.spi.security.IAuthenticator;
 import io.moquette.spi.security.IAuthorizator;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.mqtt.*;
+import io.netty.handler.codec.mqtt.MqttConnAckMessage;
+import io.netty.handler.codec.mqtt.MqttConnAckVariableHeader;
+import io.netty.handler.codec.mqtt.MqttConnectAckPayload;
+import io.netty.handler.codec.mqtt.MqttConnectMessage;
+import io.netty.handler.codec.mqtt.MqttConnectPayload;
+import io.netty.handler.codec.mqtt.MqttConnectReturnCode;
+import io.netty.handler.codec.mqtt.MqttFixedHeader;
+import io.netty.handler.codec.mqtt.MqttMessage;
+import io.netty.handler.codec.mqtt.MqttMessageType;
+import io.netty.handler.codec.mqtt.MqttPubAckMessage;
+import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.netty.handler.codec.mqtt.MqttQoS;
+import io.netty.handler.codec.mqtt.MqttSubAckMessage;
+import io.netty.handler.codec.mqtt.MqttSubAckPayload;
+import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
+import io.netty.handler.codec.mqtt.MqttTopicSubscription;
+import io.netty.handler.codec.mqtt.MqttUnsubscribeMessage;
+import io.netty.handler.codec.mqtt.MqttVersion;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import win.liyufan.im.Utility;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
+import static io.moquette.server.ConnectionDescriptor.ConnectionState.DISCONNECTED;
+import static io.moquette.server.ConnectionDescriptor.ConnectionState.ESTABLISHED;
+import static io.moquette.server.ConnectionDescriptor.ConnectionState.INTERCEPTORS_NOTIFIED;
+import static io.moquette.server.ConnectionDescriptor.ConnectionState.MESSAGES_DROPPED;
+import static io.moquette.server.ConnectionDescriptor.ConnectionState.SENDACK;
+import static io.moquette.server.ConnectionDescriptor.ConnectionState.SESSION_CREATED;
 import static io.moquette.spi.impl.InternalRepublisher.createPublishForQos;
 import static io.moquette.spi.impl.Utils.readBytesAndRewind;
-import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.*;
+import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_ACCEPTED;
+import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD;
+import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED;
+import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_REFUSED_SESSION_NOT_EXIST;
+import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION;
 import static io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader.from;
-import static io.netty.handler.codec.mqtt.MqttQoS.*;
-import static io.moquette.server.ConnectionDescriptor.ConnectionState.*;
+import static io.netty.handler.codec.mqtt.MqttQoS.AT_LEAST_ONCE;
 
 /**
  * Class responsible to handle the logic of MQTT protocol it's the director of the protocol
  * execution.
- *
+ * <p>
  * Used by the front facing class ProtocolProcessorBootstrapper.
  */
 public class ProtocolProcessor {
@@ -71,7 +101,7 @@ public class ProtocolProcessor {
                     Utility.printExecption(LOG, e);
                 }
             }
-        } else if(target.type == TargetEntry.Type.TARGET_TYPE_CHATROOM) {
+        } else if (target.type == TargetEntry.Type.TARGET_TYPE_CHATROOM) {
 
         }
     }
@@ -102,16 +132,11 @@ public class ProtocolProcessor {
     }
 
     /**
-     * @param storageService
-     *            the persistent store to use for save/load of messages for QoS1 and QoS2 handling.
-     * @param sessionsStore
-     *            the clients sessions store, used to persist subscriptions.
-     * @param authenticator
-     *            true to allow clients connect without a clientid
-     * @param authorizator
-     *            used to apply ACL policies to publishes and subscriptions.
-     * @param interceptor
-     *            to notify events to an intercept handler
+     * @param storageService the persistent store to use for save/load of messages for QoS1 and QoS2 handling.
+     * @param sessionsStore  the clients sessions store, used to persist subscriptions.
+     * @param authenticator  true to allow clients connect without a clientid
+     * @param authorizator   used to apply ACL policies to publishes and subscriptions.
+     * @param interceptor    to notify events to an intercept handler
      */
     void init(ConnectionDescriptorStore connectionDescriptors,
               IMessagesStore storageService, ISessionsStore sessionsStore, IAuthenticator authenticator, IAuthorizator authorizator,
@@ -132,7 +157,7 @@ public class ProtocolProcessor {
 
         LOG.info("Initializing QoS publish handlers...");
         this.qos1PublishHandler = new Qos1PublishHandler(m_authorizator, m_messagesStore, m_interceptor,
-                this.connectionDescriptors, this.messagesPublisher, sessionsStore, server.getImBusinessScheduler(), server);
+            this.connectionDescriptors, this.messagesPublisher, sessionsStore, server.getImBusinessScheduler(), server);
 
         mServer = server;
     }
@@ -143,8 +168,8 @@ public class ProtocolProcessor {
         LOG.info("Processing CONNECT message. CId={}, username={}", clientId, payload.userName());
 
         if (msg.variableHeader().version() != MqttVersion.MQTT_3_1.protocolLevel()
-                && msg.variableHeader().version() != MqttVersion.MQTT_3_1_1.protocolLevel()
-                && msg.variableHeader().version() != MqttVersion.Wildfire_1.protocolLevel()) {
+            && msg.variableHeader().version() != MqttVersion.MQTT_3_1_1.protocolLevel()
+            && msg.variableHeader().version() != MqttVersion.Wildfire_1.protocolLevel()) {
             MqttConnAckMessage badProto = connAck(CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION);
 
             LOG.error("MQTT protocol version is not valid. CId={}", clientId);
@@ -209,7 +234,7 @@ public class ProtocolProcessor {
             return;
         }
         MemorySessionStore.Session session = m_sessionsStore.getSession(clientId);
-        if(session != null) {
+        if (session != null) {
             session.refreshLastActiveTime();
         }
 
@@ -240,6 +265,7 @@ public class ProtocolProcessor {
         MqttConnAckVariableHeader mqttConnAckVariableHeader = new MqttConnAckVariableHeader(returnCode, sessionPresent);
         return new MqttConnAckMessage(mqttFixedHeader, mqttConnAckVariableHeader, new MqttConnectAckPayload(data));
     }
+
     private boolean login(Channel channel, MqttConnectMessage msg, final String clientId, MqttVersion mqttVersion) {
         // handle user authentication
         if (msg.variableHeader().hasUserName()) {
@@ -257,7 +283,7 @@ public class ProtocolProcessor {
                     m_sessionsStore.createNewSession(msg.payload().userName(), clientId, true, false);
                     session = m_sessionsStore.getSession(clientId);
                 }
-                
+
                 if (session != null && session.getUsername().equals(msg.payload().userName())) {
                     pwd = AES.AESDecrypt(pwd, session.getSecret(), true);
                 } else {
@@ -279,7 +305,7 @@ public class ProtocolProcessor {
             }
             if (!m_authenticator.checkValid(clientId, msg.payload().userName(), pwd)) {
                 LOG.error("Authenticator has rejected the MQTT credentials CId={}, username={}, password={}",
-                        clientId, msg.payload().userName(), pwd);
+                    clientId, msg.payload().userName(), pwd);
                 failedCredentials(channel);
                 return false;
             }
@@ -341,11 +367,11 @@ public class ProtocolProcessor {
         setIdleTime(channel.pipeline(), idleTime);
 
         LOG.debug("The connection has been configured CId={}, keepAlive={}, cleanSession={}, idleTime={}",
-                clientId, keepAlive, msg.variableHeader().isCleanSession(), idleTime);
+            clientId, keepAlive, msg.variableHeader().isCleanSession(), idleTime);
     }
 
     private ClientSession createOrLoadClientSession(String username, ConnectionDescriptor descriptor, MqttConnectMessage msg,
-            String clientId) {
+                                                    String clientId) {
         final boolean success = descriptor.assignState(SENDACK, SESSION_CREATED);
         if (!success) {
             return null;
@@ -405,7 +431,7 @@ public class ProtocolProcessor {
         byte[] payloadContent = readBytesAndRewind(payload);
 
         IMessagesStore.StoredMessage stored = new IMessagesStore.StoredMessage(payloadContent,
-                msg.fixedHeader().qosLevel(), msg.variableHeader().topicName());
+            msg.fixedHeader().qosLevel(), msg.variableHeader().topicName());
         stored.setRetained(msg.fixedHeader().isRetain());
         return stored;
     }
@@ -413,9 +439,9 @@ public class ProtocolProcessor {
     public void processPublish(Channel channel, MqttPublishMessage msg) {
         final MqttQoS qos = msg.fixedHeader().qosLevel();
         final String clientId = NettyUtils.clientID(channel);
-        
+
         LOG.info("Processing PUBLISH message. CId={}, topic={}, messageId={}, qos={}", clientId,
-                msg.variableHeader().topicName(), msg.variableHeader().packetId(), qos);
+            msg.variableHeader().topicName(), msg.variableHeader().packetId(), qos);
         switch (qos) {
             case AT_MOST_ONCE:
                 //not support
@@ -436,10 +462,8 @@ public class ProtocolProcessor {
      * Second phase of a publish QoS2 protocol, sent by publisher to the broker. Search the stored
      * message and publish to all interested subscribers.
      *
-     * @param channel
-     *            the channel of the incoming message.
-     * @param msg
-     *            the decoded pubrel message.
+     * @param channel the channel of the incoming message.
+     * @param msg     the decoded pubrel message.
      */
     public void processPubRel(Channel channel, MqttMessage msg) {
         //not use
@@ -450,7 +474,7 @@ public class ProtocolProcessor {
     }
 
     public void processPubComp(Channel channel, MqttMessage msg) {
-       //not use
+        //not use
     }
 
     public void processDisconnect(Channel channel, boolean clearSession) throws InterruptedException {
@@ -545,9 +569,9 @@ public class ProtocolProcessor {
     public void processConnectionLost(String clientID, Channel channel) {
         LOG.info("Processing connection lost event. CId={}", clientID);
         ConnectionDescriptor oldConnDescr = new ConnectionDescriptor(clientID, channel);
-        if(connectionDescriptors.removeConnection(oldConnDescr)) {
+        if (connectionDescriptors.removeConnection(oldConnDescr)) {
             MemorySessionStore.Session session = m_sessionsStore.getSession(clientID);
-            if(session != null) {
+            if (session != null) {
                 session.refreshLastActiveTime();
             }
             String username = NettyUtils.userName(channel);
@@ -559,10 +583,8 @@ public class ProtocolProcessor {
      * Remove the clientID from topic subscription, if not previously subscribed, doesn't reply any
      * error.
      *
-     * @param channel
-     *            the channel of the incoming message.
-     * @param msg
-     *            the decoded unsubscribe message.
+     * @param channel the channel of the incoming message.
+     * @param msg     the decoded unsubscribe message.
      */
     public void processUnsubscribe(Channel channel, MqttUnsubscribeMessage msg) {
         //Not use
@@ -597,8 +619,8 @@ public class ProtocolProcessor {
                 emptyQueue = true;
             } else {
                 // recreate a publish from stored publish in queue
-                MqttPublishMessage pubMsg = createPublishForQos( msg.getTopic(), msg.getQos(), msg.getPayload(),
-                        msg.isRetained(), 0);
+                MqttPublishMessage pubMsg = createPublishForQos(msg.getTopic(), msg.getQos(), msg.getPayload(),
+                    msg.isRetained(), 0);
                 channel.write(pubMsg);
             }
         }
@@ -622,13 +644,14 @@ public class ProtocolProcessor {
     }
 
     public void onRpcMsg(String fromUser, String clientId, byte[] message, int messageId, String from, String request, boolean isAdmin) {
-        if(request.equals(RPCCenter.KICKOFF_USER_REQUEST)) {
+        if (request.equals(RPCCenter.KICKOFF_USER_REQUEST)) {
             String userId = new String(message);
-            mServer.getImBusinessScheduler().execute(()->handleTargetRemovedFromCurrentNode(new TargetEntry(TargetEntry.Type.TARGET_TYPE_USER, userId)));
+            mServer.getImBusinessScheduler().execute(() -> handleTargetRemovedFromCurrentNode(new TargetEntry(TargetEntry.Type.TARGET_TYPE_USER, userId)));
             return;
         }
         qos1PublishHandler.onRpcMsg(fromUser, clientId, message, messageId, from, request, isAdmin);
     }
+
     public void shutdown() {
         messagesPublisher.stopChatroomScheduler();
     }

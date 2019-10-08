@@ -69,7 +69,7 @@ public class RateLimiter {
 
     private void cleanUp(long current) {
         if (current - lastCleanTime > expire) {
-            for (Iterator<Map.Entry<String, Long>> it = requestTimeMap.entrySet().iterator(); it.hasNext();) {
+            for (Iterator<Map.Entry<String, Long>> it = requestTimeMap.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<String, Long> entry = it.next();
                 if (entry.getValue() < current - expire) {
                     it.remove();

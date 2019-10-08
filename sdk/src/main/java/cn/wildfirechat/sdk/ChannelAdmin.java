@@ -1,7 +1,11 @@
 package cn.wildfirechat.sdk;
 
 import cn.wildfirechat.common.APIPath;
-import cn.wildfirechat.pojos.*;
+import cn.wildfirechat.pojos.InputCreateChatroom;
+import cn.wildfirechat.pojos.InputDestoryChatroom;
+import cn.wildfirechat.pojos.InputGetChatroomInfo;
+import cn.wildfirechat.pojos.OutputCreateChatroom;
+import cn.wildfirechat.pojos.OutputGetChatroomInfo;
 import cn.wildfirechat.sdk.model.IMResult;
 import cn.wildfirechat.sdk.utilities.AdminHttpUtils;
 
@@ -23,5 +27,5 @@ public class ChannelAdmin {
         InputGetChatroomInfo input = new InputGetChatroomInfo(chatroomId);
         return AdminHttpUtils.httpJsonPost(path, input, OutputGetChatroomInfo.class);
     }
-    
+
 }

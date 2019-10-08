@@ -9,6 +9,9 @@
 package com.xiaoleilu.loServer.action.robot;
 
 import cn.wildfirechat.common.APIPath;
+import cn.wildfirechat.common.ErrorCode;
+import cn.wildfirechat.pojos.InputGetUserInfo;
+import cn.wildfirechat.pojos.InputOutputUserInfo;
 import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
@@ -16,12 +19,9 @@ import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import cn.wildfirechat.pojos.InputOutputUserInfo;
-import cn.wildfirechat.pojos.InputGetUserInfo;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
-import cn.wildfirechat.common.ErrorCode;
 
 @Route(APIPath.Robot_User_Info)
 @HttpMethod("POST")
@@ -35,11 +35,11 @@ public class GetUserAction extends RobotAction {
                 && (!StringUtil.isNullOrEmpty(inputUserId.getUserId()) || !StringUtil.isNullOrEmpty(inputUserId.getName()) || !StringUtil.isNullOrEmpty(inputUserId.getMobile()))) {
 
                 WFCMessage.User user = null;
-                if(!StringUtil.isNullOrEmpty(inputUserId.getUserId())) {
+                if (!StringUtil.isNullOrEmpty(inputUserId.getUserId())) {
                     user = messagesStore.getUserInfo(inputUserId.getUserId());
-                } else if(!StringUtil.isNullOrEmpty(inputUserId.getName())) {
+                } else if (!StringUtil.isNullOrEmpty(inputUserId.getName())) {
                     user = messagesStore.getUserInfoByName(inputUserId.getName());
-                } else if(!StringUtil.isNullOrEmpty(inputUserId.getMobile())) {
+                } else if (!StringUtil.isNullOrEmpty(inputUserId.getMobile())) {
                     user = messagesStore.getUserInfoByMobile(inputUserId.getMobile());
                 }
 

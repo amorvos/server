@@ -125,33 +125,41 @@ public class MessagePayload {
             .setExpireDuration(expireDuration)
             .setMentionedType(mentionedType);
 
-        if (!StringUtil.isNullOrEmpty(searchableContent))
+        if (!StringUtil.isNullOrEmpty(searchableContent)) {
             builder.setSearchableContent(searchableContent);
-        if (!StringUtil.isNullOrEmpty(pushContent))
+        }
+        if (!StringUtil.isNullOrEmpty(pushContent)) {
             builder.setPushContent(pushContent);
-        if (!StringUtil.isNullOrEmpty(searchableContent))
+        }
+        if (!StringUtil.isNullOrEmpty(searchableContent)) {
             builder.setContent(searchableContent);
-        if (!StringUtil.isNullOrEmpty(base64edData))
+        }
+        if (!StringUtil.isNullOrEmpty(base64edData)) {
             builder.setData(ByteString.copyFrom(Base64.getDecoder().decode(base64edData)));
-        if (!StringUtil.isNullOrEmpty(remoteMediaUrl))
+        }
+        if (!StringUtil.isNullOrEmpty(remoteMediaUrl)) {
             builder.setRemoteMediaUrl(remoteMediaUrl);
-        if (mentionedTarget != null && mentionedTarget.size() > 0)
+        }
+        if (mentionedTarget != null && mentionedTarget.size() > 0) {
             builder.addAllMentionedTarget(mentionedTarget);
+        }
 
         return builder.build();
     }
 
     public static MessagePayload fromProtoMessageContent(WFCMessage.MessageContent protoContent) {
-        if (protoContent == null)
+        if (protoContent == null) {
             return null;
+        }
 
         MessagePayload payload = new MessagePayload();
         payload.type = protoContent.getType();
         payload.searchableContent = protoContent.getSearchableContent();
         payload.pushContent = protoContent.getPushContent();
         payload.content = protoContent.getContent();
-        if (protoContent.getData() != null && protoContent.getData().size() > 0)
+        if (protoContent.getData() != null && protoContent.getData().size() > 0) {
             payload.base64edData = Base64.getEncoder().encodeToString(protoContent.getData().toByteArray());
+        }
         payload.mediaType = protoContent.getMediaType();
         payload.remoteMediaUrl = protoContent.getRemoteMediaUrl();
         payload.persistFlag = protoContent.getPersistFlag();

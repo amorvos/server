@@ -10,17 +10,23 @@ package win.liyufan.im;
 
 import org.slf4j.Logger;
 
-import java.net.*;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 
 public class Utility {
-    public static InetAddress getLocalAddress(){
+    public static InetAddress getLocalAddress() {
         try {
             Enumeration<NetworkInterface> b = NetworkInterface.getNetworkInterfaces();
-            while( b.hasMoreElements()){
-                for ( InterfaceAddress f : b.nextElement().getInterfaceAddresses())
-                    if ( f.getAddress().isSiteLocalAddress())
+            while (b.hasMoreElements()) {
+                for (InterfaceAddress f : b.nextElement().getInterfaceAddresses()) {
+                    if (f.getAddress().isSiteLocalAddress()) {
                         return f.getAddress();
+                    }
+                }
             }
         } catch (SocketException e) {
             e.printStackTrace();
@@ -31,7 +37,7 @@ public class Utility {
     public static void printExecption(Logger LOG, Exception e) {
         String message = "";
 
-        for(StackTraceElement stackTraceElement : e.getStackTrace()) {
+        for (StackTraceElement stackTraceElement : e.getStackTrace()) {
             message = message + System.lineSeparator() + stackTraceElement.toString();
         }
         LOG.error("Exception: {}", e.getMessage());
@@ -51,8 +57,7 @@ public class Utility {
                 macAddressBytes[macAddressByteIndex]);
             macAddressBuilder.append(macAddressHexByte);
 
-            if (macAddressByteIndex != macAddressBytes.length - 1)
-            {
+            if (macAddressByteIndex != macAddressBytes.length - 1) {
                 macAddressBuilder.append(":");
             }
         }
@@ -70,8 +75,9 @@ public class Utility {
      * @Modified 2017-04-28 下午8:55:35
      */
     public static String formatJson(String jsonStr) {
-        if (null == jsonStr || "".equals(jsonStr))
+        if (null == jsonStr || "".equals(jsonStr)) {
             return "";
+        }
         StringBuilder sb = new StringBuilder();
         char last = '\0';
         char current = '\0';
@@ -82,7 +88,7 @@ public class Utility {
             current = jsonStr.charAt(i);
             switch (current) {
                 case '"':
-                    if (last != '\\'){
+                    if (last != '\\') {
                         isInQuotationMarks = !isInQuotationMarks;
                     }
                     sb.append(current);

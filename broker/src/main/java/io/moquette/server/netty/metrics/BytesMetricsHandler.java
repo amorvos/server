@@ -16,7 +16,6 @@
 
 package io.moquette.server.netty.metrics;
 
-import io.moquette.server.netty.NettyUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -70,7 +69,7 @@ public class BytesMetricsHandler extends ChannelDuplexHandler {
             userId = "";
         }
 
-        LOG.info("channel<{}> closing after read {} bytes and wrote {} bytes", userId,  metrics.readBytes(), metrics.wroteBytes());
+        LOG.info("channel<{}> closing after read {} bytes and wrote {} bytes", userId, metrics.readBytes(), metrics.wroteBytes());
         m_collector.sumReadBytes(metrics.readBytes());
         m_collector.sumWroteBytes(metrics.wroteBytes());
         super.close(ctx, promise);

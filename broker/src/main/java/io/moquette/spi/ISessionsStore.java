@@ -16,10 +16,10 @@
 
 package io.moquette.spi;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.WFCMessage;
 import io.moquette.persistence.MemorySessionStore.Session;
 import io.moquette.spi.IMessagesStore.StoredMessage;
-import cn.wildfirechat.common.ErrorCode;
 
 import java.util.Collection;
 import java.util.Queue;
@@ -32,8 +32,7 @@ public interface ISessionsStore {
     void initStore();
 
     /**
-     * @param clientID
-     *            the session client ID.
+     * @param clientID the session client ID.
      * @return true iff there are subscriptions persisted with clientID
      */
     boolean contains(String clientID);
@@ -47,9 +46,9 @@ public interface ISessionsStore {
     Session getSession(String clientID);
 
     void updateSessionToken(Session session, boolean voip);
+
     /**
-     * @param clientID
-     *            the client owning the session.
+     * @param clientID the client owning the session.
      * @return the session for the given clientID, null if not found.
      */
 
@@ -58,7 +57,7 @@ public interface ISessionsStore {
     ClientSession sessionForClient(String clientID);
 
     void loadUserSession(String username, String clientID);
-    
+
     Collection<Session> sessionForUser(String username);
 
     /**
@@ -73,20 +72,16 @@ public interface ISessionsStore {
     /**
      * Save the message msg with  messageID, clientID as in flight
      *
-     * @param clientID
-     *            the client ID
-     * @param messageID
-     *            the message ID
-     * @param msg
-     *            the message to put in flight zone
+     * @param clientID  the client ID
+     * @param messageID the message ID
+     * @param msg       the message to put in flight zone
      */
     void inFlight(String clientID, int messageID, StoredMessage msg);
 
     /**
      * Return the next valid packetIdentifier for the given client session.
      *
-     * @param clientID
-     *            the clientID requesting next packet id.
+     * @param clientID the clientID requesting next packet id.
      * @return the next valid id.
      */
     int nextPacketID(String clientID);
@@ -94,8 +89,7 @@ public interface ISessionsStore {
     /**
      * List the published retained messages for the session
      *
-     * @param clientID
-     *            the client ID owning the queue.
+     * @param clientID the client ID owning the queue.
      * @return the queue of messages.
      */
     Queue<StoredMessage> queue(String clientID);
@@ -105,10 +99,8 @@ public interface ISessionsStore {
     void moveInFlightToSecondPhaseAckWaiting(String clientID, int messageID, StoredMessage msg);
 
     /**
-     * @param clientID
-     *            the client ID accessing the second phase.
-     * @param messageID
-     *            the message ID that reached the second phase.
+     * @param clientID  the client ID accessing the second phase.
+     * @param messageID the message ID that reached the second phase.
      * @return the guid of message just acked.
      */
     StoredMessage secondPhaseAcknowledged(String clientID, int messageID);
@@ -123,7 +115,7 @@ public interface ISessionsStore {
 
     /**
      * @return the inflight inbound (PUBREL for Qos2) message.
-     * */
+     */
     IMessagesStore.StoredMessage inboundInflight(String clientID, int messageID);
 
     void markAsInboundInflight(String clientID, int messageID, StoredMessage msg);

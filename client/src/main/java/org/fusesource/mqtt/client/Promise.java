@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,40 +35,43 @@ public class Promise<T> implements Callback<T>, Future<T> {
     private Throwable error;
     private T value;
 
+    @Override
     public void onFailure(Throwable value) {
         Callback<T> callback = null;
-        synchronized(this)  {
+        synchronized (this) {
             error = value;
             latch.countDown();
             callback = next;
         }
-        if( callback!=null ) {
+        if (callback != null) {
             callback.onFailure(value);
         }
     }
 
+    @Override
     public void onSuccess(T value) {
         Callback<T> callback = null;
-        synchronized(this)  {
+        synchronized (this) {
             this.value = value;
             latch.countDown();
             callback = next;
         }
-        if( callback!=null ) {
+        if (callback != null) {
             callback.onSuccess(value);
         }
     }
 
+    @Override
     public void then(Callback<T> callback) {
         boolean fire = false;
-        synchronized(this)  {
+        synchronized (this) {
             next = callback;
-            if( latch.getCount() == 0 ) {
+            if (latch.getCount() == 0) {
                 fire = true;
             }
         }
-        if( fire ) {
-            if( error!=null ) {
+        if (fire) {
+            if (error != null) {
                 callback.onFailure(error);
             } else {
                 callback.onSuccess(value);
@@ -76,14 +79,16 @@ public class Promise<T> implements Callback<T>, Future<T> {
         }
     }
 
+    @Override
     public T await(long amount, TimeUnit unit) throws Exception {
-        if( latch.await(amount, unit) ) {
+        if (latch.await(amount, unit)) {
             return get();
         } else {
             throw new TimeoutException();
         }
     }
 
+    @Override
     public T await() throws Exception {
         latch.await();
         return get();
@@ -91,12 +96,12 @@ public class Promise<T> implements Callback<T>, Future<T> {
 
     private T get() throws Exception {
         Throwable e = error;
-        if( e !=null ) {
-            if( e instanceof RuntimeException ) {
+        if (e != null) {
+            if (e instanceof RuntimeException) {
                 throw (RuntimeException) e;
-            } else if( e instanceof Exception) {
+            } else if (e instanceof Exception) {
                 throw (Exception) e;
-            } else if( e instanceof Error) {
+            } else if (e instanceof Error) {
                 throw (Error) e;
             } else {
                 // don't expect to hit this case.

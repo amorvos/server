@@ -43,7 +43,7 @@ public final class MqttUnsubscribePayload {
             builder.append("topicName = ").append(topics.get(i)).append(", ");
         }
         builder.append("topicName = ").append(topics.get(topics.size() - 1))
-               .append(']');
+            .append(']');
         return builder.toString();
     }
 }

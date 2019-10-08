@@ -16,11 +16,12 @@
 
 package io.moquette.server.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ClasspathResourceLoader implements IResourceLoader {
 

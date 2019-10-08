@@ -1,24 +1,18 @@
 package io.moquette.spi.impl.security;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 public class AES {
-    private static byte[] aes_key= {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x78,0x79,0x7A,0x7B,0x7C,0x7D,0x7E,0x7F};
+    private static byte[] aes_key = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E, 0x7F};
+
     public static void init(byte[] secret) {
         if (secret != null && secret.length == 16) {
             aes_key = new byte[16];
@@ -53,19 +47,19 @@ public class AES {
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
 
             //2018.1.1 0:0:0 以来的小时数
-            int curhour = (int) ((System.currentTimeMillis()/1000 - 1514736000)/3600);
+            int curhour = (int) ((System.currentTimeMillis() / 1000 - 1514736000) / 3600);
 
             byte[] tobeencrypdatawithtime = new byte[tobeencrypdata.length + 4];
-            byte byte0 = (byte)(curhour & 0xFF);
+            byte byte0 = (byte) (curhour & 0xFF);
             tobeencrypdatawithtime[0] = byte0;
 
-            byte byte1 = (byte)((curhour & 0xFF00) >> 8);
+            byte byte1 = (byte) ((curhour & 0xFF00) >> 8);
             tobeencrypdatawithtime[1] = byte1;
 
-            byte byte2 = (byte)((curhour & 0xFF0000) >> 16);
+            byte byte2 = (byte) ((curhour & 0xFF0000) >> 16);
             tobeencrypdatawithtime[2] = byte2;
 
-            byte byte3 = (byte)((curhour & 0xFF) >> 24);
+            byte byte3 = (byte) ((curhour & 0xFF) >> 24);
             tobeencrypdatawithtime[3] = byte3;
 
             System.arraycopy(tobeencrypdata, 0, tobeencrypdatawithtime, 4, tobeencrypdata.length);
@@ -88,6 +82,7 @@ public class AES {
         }
         return null;
     }
+
     public static byte[] AESEncrypt(byte[] tobeencrypdata, String userKey) {
         byte[] aesKey = aes_key;
         if (userKey != null && !userKey.isEmpty()) {
@@ -96,8 +91,8 @@ public class AES {
         return AESEncrypt(tobeencrypdata, aesKey);
     }
 
-    public static int getUnsignedByte (byte data){      //将data字节型数据转换为0~255 (0xFF 即BYTE)。
-        return data&0x0FF ;
+    public static int getUnsignedByte(byte data) {      //将data字节型数据转换为0~255 (0xFF 即BYTE)。
+        return data & 0x0FF;
     }
 
     private static byte[] convertUserKey(String userKey) {
@@ -107,6 +102,7 @@ public class AES {
         }
         return key;
     }
+
     public static byte[] AESDecrypt(byte[] sSrc, String userKey, boolean checkTime) {
         byte[] aesKey = aes_key;
         if (userKey != null && !userKey.isEmpty()) {
@@ -149,7 +145,7 @@ public class AES {
                     hours += getUnsignedByte(original[0]);
 
                     //2018.1.1 0:0:0 以来的小时数
-                    int curhour = (int) ((System.currentTimeMillis()/1000 - 1514736000)/3600);
+                    int curhour = (int) ((System.currentTimeMillis() / 1000 - 1514736000) / 3600);
 
                     if (curhour - hours > 24 && checkTime) {
                         return null;

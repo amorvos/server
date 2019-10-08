@@ -8,12 +8,13 @@
 
 package io.moquette.imhandler;
 
+import cn.wildfirechat.common.ErrorCode;
+import cn.wildfirechat.pojos.GroupNotificationBinaryContent;
 import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
-import cn.wildfirechat.pojos.GroupNotificationBinaryContent;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import cn.wildfirechat.common.ErrorCode;
+
 import static win.liyufan.im.IMTopic.KickoffGroupMemberTopic;
 
 @Handler(value = KickoffGroupMemberTopic)

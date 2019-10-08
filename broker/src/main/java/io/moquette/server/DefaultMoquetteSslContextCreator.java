@@ -21,13 +21,22 @@ import io.moquette.server.config.IConfig;
 import io.moquette.spi.security.ISslContextCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.security.*;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
 /**
@@ -87,9 +96,9 @@ public class DefaultMoquetteSslContextCreator implements ISslContextCreator {
             TrustManager[] trustManagers = null;
             if (needsClientAuth) {
                 LOG.warn(
-                        "Client authentication is enabled. "
+                    "Client authentication is enabled. "
                         + "The keystore will be used as a truststore. KeystorePath = {}.",
-                        jksPath);
+                    jksPath);
                 // use keystore as truststore, as server needs to trust certificates signed by the
                 // server certificates
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
@@ -103,11 +112,11 @@ public class DefaultMoquetteSslContextCreator implements ISslContextCreator {
 
             return serverContext;
         } catch (NoSuchAlgorithmException | UnrecoverableKeyException | CertificateException | KeyStoreException
-                | KeyManagementException | IOException ex) {
+            | KeyManagementException | IOException ex) {
             LOG.error(
-                    "Unable to initialize SSL context. Cause = {}, errorMessage = {}.",
-                    ex.getCause(),
-                    ex.getMessage());
+                "Unable to initialize SSL context. Cause = {}, errorMessage = {}.",
+                ex.getCause(),
+                ex.getMessage());
             return null;
         }
     }

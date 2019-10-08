@@ -75,16 +75,16 @@ final class MqttCodecUtil {
             case UNSUBACK:
             case PINGREQ:
             case PINGRESP:
-            //case DISCONNECT:
+                //case DISCONNECT:
                 if (mqttFixedHeader.isDup() ||
-                        mqttFixedHeader.qosLevel() != MqttQoS.AT_MOST_ONCE ||
-                        mqttFixedHeader.isRetain()) {
+                    mqttFixedHeader.qosLevel() != MqttQoS.AT_MOST_ONCE ||
+                    mqttFixedHeader.isRetain()) {
                     return new MqttFixedHeader(
-                            mqttFixedHeader.messageType(),
-                            false,
-                            MqttQoS.AT_MOST_ONCE,
-                            false,
-                            mqttFixedHeader.remainingLength());
+                        mqttFixedHeader.messageType(),
+                        false,
+                        MqttQoS.AT_MOST_ONCE,
+                        false,
+                        mqttFixedHeader.remainingLength());
                 }
                 return mqttFixedHeader;
             case PUBREL:
@@ -92,11 +92,11 @@ final class MqttCodecUtil {
             case UNSUBSCRIBE:
                 if (mqttFixedHeader.isRetain()) {
                     return new MqttFixedHeader(
-                            mqttFixedHeader.messageType(),
-                            mqttFixedHeader.isDup(),
-                            mqttFixedHeader.qosLevel(),
-                            false,
-                            mqttFixedHeader.remainingLength());
+                        mqttFixedHeader.messageType(),
+                        mqttFixedHeader.isDup(),
+                        mqttFixedHeader.qosLevel(),
+                        false,
+                        mqttFixedHeader.remainingLength());
                 }
                 return mqttFixedHeader;
             default:
@@ -104,5 +104,6 @@ final class MqttCodecUtil {
         }
     }
 
-    private MqttCodecUtil() { }
+    private MqttCodecUtil() {
+    }
 }

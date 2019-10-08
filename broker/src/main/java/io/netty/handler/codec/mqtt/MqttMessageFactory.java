@@ -26,43 +26,43 @@ public final class MqttMessageFactory {
 
     public static MqttMessage newMessage(MqttFixedHeader mqttFixedHeader, Object variableHeader, Object payload) {
         switch (mqttFixedHeader.messageType()) {
-            case CONNECT :
+            case CONNECT:
                 return new MqttConnectMessage(
-                        mqttFixedHeader,
-                        (MqttConnectVariableHeader) variableHeader,
-                        (MqttConnectPayload) payload);
+                    mqttFixedHeader,
+                    (MqttConnectVariableHeader) variableHeader,
+                    (MqttConnectPayload) payload);
 
             case CONNACK:
                 return new MqttConnAckMessage(mqttFixedHeader, (MqttConnAckVariableHeader) variableHeader);
 
             case SUBSCRIBE:
                 return new MqttSubscribeMessage(
-                        mqttFixedHeader,
-                        (MqttMessageIdVariableHeader) variableHeader,
-                        (MqttSubscribePayload) payload);
+                    mqttFixedHeader,
+                    (MqttMessageIdVariableHeader) variableHeader,
+                    (MqttSubscribePayload) payload);
 
             case SUBACK:
                 return new MqttSubAckMessage(
-                        mqttFixedHeader,
-                        (MqttMessageIdVariableHeader) variableHeader,
-                        (MqttSubAckPayload) payload);
+                    mqttFixedHeader,
+                    (MqttMessageIdVariableHeader) variableHeader,
+                    (MqttSubAckPayload) payload);
 
             case UNSUBACK:
                 return new MqttUnsubAckMessage(
-                        mqttFixedHeader,
-                        (MqttMessageIdVariableHeader) variableHeader);
+                    mqttFixedHeader,
+                    (MqttMessageIdVariableHeader) variableHeader);
 
             case UNSUBSCRIBE:
                 return new MqttUnsubscribeMessage(
-                        mqttFixedHeader,
-                        (MqttMessageIdVariableHeader) variableHeader,
-                        (MqttUnsubscribePayload) payload);
+                    mqttFixedHeader,
+                    (MqttMessageIdVariableHeader) variableHeader,
+                    (MqttUnsubscribePayload) payload);
 
             case PUBLISH:
                 return new MqttPublishMessage(
-                        mqttFixedHeader,
-                        (MqttPublishVariableHeader) variableHeader,
-                        (ByteBuf) payload);
+                    mqttFixedHeader,
+                    (MqttPublishVariableHeader) variableHeader,
+                    (ByteBuf) payload);
 
             case PUBACK:
                 return new MqttPubAckMessage(mqttFixedHeader, (MqttMessageIdVariableHeader) variableHeader);
@@ -85,5 +85,6 @@ public final class MqttMessageFactory {
         return new MqttMessage(null, null, null, DecoderResult.failure(cause));
     }
 
-    private MqttMessageFactory() { }
+    private MqttMessageFactory() {
+    }
 }

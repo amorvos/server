@@ -16,30 +16,34 @@
 
 package io.moquette.spi.impl;
 
+import cn.wildfirechat.pojos.OutputNotifyChannelSubscribeStatus;
+import cn.wildfirechat.pojos.SendMessageData;
 import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.util.StringUtil;
-import cn.wildfirechat.pojos.OutputNotifyChannelSubscribeStatus;
-import cn.wildfirechat.pojos.SendMessageData;
-import io.moquette.persistence.*;
 import io.moquette.persistence.MemorySessionStore.Session;
+import io.moquette.persistence.UserClientEntry;
 import io.moquette.server.ConnectionDescriptorStore;
 import io.moquette.spi.IMessagesStore;
 import io.moquette.spi.ISessionsStore;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.mqtt.*;
-import win.liyufan.im.HttpUtils;
-import win.liyufan.im.IMTopic;
-
-
+import io.netty.handler.codec.mqtt.MqttFixedHeader;
+import io.netty.handler.codec.mqtt.MqttMessageType;
+import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
+import io.netty.handler.codec.mqtt.MqttQoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import win.liyufan.im.HttpUtils;
+import win.liyufan.im.IMTopic;
 import win.liyufan.im.Utility;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -65,7 +69,7 @@ public class MessagesPublisher {
                 try {
                     if (chatRoomHeaders.size() < 100) {
                         Thread.sleep(500);
-                    } else if(chatRoomHeaders.size() < 500) {
+                    } else if (chatRoomHeaders.size() < 500) {
                         Thread.sleep(100);
                     }
                 } catch (InterruptedException e) {
@@ -105,7 +109,7 @@ public class MessagesPublisher {
     }
 
     private static MqttPublishMessage notRetainedPublishWithMessageId(String topic, MqttQoS qos, ByteBuf message,
-            int messageId) {
+                                                                      int messageId) {
         MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, qos, false, 0);
         MqttPublishVariableHeader varHeader = new MqttPublishVariableHeader(topic, messageId);
         return new MqttPublishMessage(fixedHeader, varHeader, message);
@@ -123,7 +127,7 @@ public class MessagesPublisher {
                 LOG.warn("session for {} not exit", clientId);
                 return;
             }
-            if(!session.getUsername().equals(user)) {
+            if (!session.getUsername().equals(user)) {
                 LOG.warn("session {} user is not {}", clientId, user);
                 return;
             }
@@ -195,7 +199,7 @@ public class MessagesPublisher {
             }
             for (Session targetSession : sessions) {
                 //超过7天不活跃的用户忽略
-                if(System.currentTimeMillis() - targetSession.getLastActiveTime() > 7 * 24 * 60 * 60 * 1000) {
+                if (System.currentTimeMillis() - targetSession.getLastActiveTime() > 7 * 24 * 60 * 60 * 1000) {
                     continue;
                 }
 
@@ -216,7 +220,7 @@ public class MessagesPublisher {
                         targetSession.refreshLastChatroomActiveTime();
                     }
 
-                    if(System.currentTimeMillis() - targetSession.getLastChatroomActiveTime() > 5*60*1000) {
+                    if (System.currentTimeMillis() - targetSession.getLastChatroomActiveTime() > 5 * 60 * 1000) {
                         m_messagesStore.handleQuitChatroom(user, targetSession.getClientID(), target);
                         continue;
                     }
@@ -290,7 +294,7 @@ public class MessagesPublisher {
                     if (mentionType == 2) {
                         curMentionType = 2;
                         isSlient = false;
-                    } else if (mentionType == 1){
+                    } else if (mentionType == 1) {
                         if (mentionTargets != null && mentionTargets.contains(user)) {
                             curMentionType = 1;
                             isSlient = false;
@@ -314,7 +318,7 @@ public class MessagesPublisher {
 
                     boolean isHiddenDetail = m_messagesStore.getUserPushHiddenDetail(user);
 
-                    if(!nameLoaded) {
+                    if (!nameLoaded) {
                         senderName = getUserDisplayName(sender);
                         targetName = getTargetName(target, conversationType);
                         nameLoaded = true;
@@ -357,7 +361,7 @@ public class MessagesPublisher {
 
     String getUserDisplayName(String userId) {
         WFCMessage.User user = m_messagesStore.getUserInfo(userId);
-        if(user != null) {
+        if (user != null) {
             return user.getDisplayName();
         }
         return null;
@@ -366,9 +370,9 @@ public class MessagesPublisher {
     String getTargetName(String targetId, int cnvType) {
         if (cnvType == ProtoConstants.ConversationType.ConversationType_Private) {
             return getUserDisplayName(targetId);
-        } else if(cnvType == ProtoConstants.ConversationType.ConversationType_Group) {
+        } else if (cnvType == ProtoConstants.ConversationType.ConversationType_Group) {
             WFCMessage.GroupInfo group = m_messagesStore.getGroupInfo(targetId);
-            if(group != null) {
+            if (group != null) {
                 return group.getName();
             }
         }
@@ -402,14 +406,16 @@ public class MessagesPublisher {
         final long messageSeq = m_messagesStore.insertChatroomMessages(chatroomId, line, messageId);
         Collection<UserClientEntry> members = m_messagesStore.getChatroomMembers(chatroomId);
         for (UserClientEntry member : members
-             ) {
+        ) {
             chatRoomHeaders.compute(member, new BiFunction<UserClientEntry, Long, Long>() {
                 @Override
                 public Long apply(UserClientEntry s, Long aLong) {
-                    if (aLong == null)
+                    if (aLong == null) {
                         return messageSeq;
-                    if (messageSeq > aLong)
+                    }
+                    if (messageSeq > aLong) {
                         return messageSeq;
+                    }
                     return aLong;
                 }
             });
@@ -470,19 +476,19 @@ public class MessagesPublisher {
             int type = message.getContent().getType();
             if (type == ProtoConstants.ContentType.Image) {
                 pushContent = "[图片]";
-            } else if(type == ProtoConstants.ContentType.Location) {
+            } else if (type == ProtoConstants.ContentType.Location) {
                 pushContent = "[位置]";
-            } else if(type == ProtoConstants.ContentType.Text) {
+            } else if (type == ProtoConstants.ContentType.Text) {
                 pushContent = message.getContent().getSearchableContent();
-            } else if(type == ProtoConstants.ContentType.Voice) {
+            } else if (type == ProtoConstants.ContentType.Voice) {
                 pushContent = "[语音]";
-            } else if(type == ProtoConstants.ContentType.Video) {
+            } else if (type == ProtoConstants.ContentType.Video) {
                 pushContent = "[视频]";
-            } else if(type == ProtoConstants.ContentType.RichMedia) {
+            } else if (type == ProtoConstants.ContentType.RichMedia) {
                 pushContent = "[图文]";
-            } else if(type == ProtoConstants.ContentType.File) {
+            } else if (type == ProtoConstants.ContentType.File) {
                 pushContent = "[文件]";
-            } else if(type == ProtoConstants.ContentType.Sticker) {
+            } else if (type == ProtoConstants.ContentType.Sticker) {
                 pushContent = "[表情]";
             }
         }
@@ -492,10 +498,10 @@ public class MessagesPublisher {
         }
 
         publish2Receivers(message.getFromUser(),
-                    message.getConversation().getType(), message.getConversation().getTarget(), message.getConversation().getLine(),
-                    messageId,
-                    receivers,
-                    pushContent, exceptClientId, pullType, message.getContent().getType(), message.getServerTimestamp(), message.getContent().getMentionedType(), message.getContent().getMentionedTargetList(), message.getContent().getPersistFlag());
+            message.getConversation().getType(), message.getConversation().getTarget(), message.getConversation().getLine(),
+            messageId,
+            receivers,
+            pushContent, exceptClientId, pullType, message.getContent().getType(), message.getServerTimestamp(), message.getContent().getMentionedType(), message.getContent().getMentionedTargetList(), message.getContent().getPersistFlag());
 
     }
 

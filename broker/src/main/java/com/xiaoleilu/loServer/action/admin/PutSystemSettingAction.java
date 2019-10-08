@@ -10,10 +10,7 @@ package com.xiaoleilu.loServer.action.admin;
 
 import cn.wildfirechat.common.APIPath;
 import cn.wildfirechat.common.ErrorCode;
-import cn.wildfirechat.pojos.InputGetUserInfo;
-import cn.wildfirechat.pojos.InputOutputUserInfo;
 import cn.wildfirechat.pojos.SystemSettingPojo;
-import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
@@ -26,7 +23,7 @@ import io.netty.util.internal.StringUtil;
 
 @Route(APIPath.Put_System_Setting)
 @HttpMethod("POST")
-public class PutSystemSettingAction extends AdminAction {
+public class PutSystemSettingAction extends AbstractAdminAction {
 
     @Override
     public boolean isTransactionAction() {

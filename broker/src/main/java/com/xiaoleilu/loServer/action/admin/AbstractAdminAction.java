@@ -8,6 +8,7 @@
 
 package com.xiaoleilu.loServer.action.admin;
 
+import cn.wildfirechat.common.ErrorCode;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.action.Action;
@@ -16,13 +17,18 @@ import com.xiaoleilu.loServer.handler.Response;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
 import org.apache.commons.codec.digest.DigestUtils;
-import cn.wildfirechat.common.ErrorCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import win.liyufan.im.RateLimiter;
 
-abstract public class AdminAction extends Action {
+abstract public class AbstractAdminAction extends Action {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAdminAction.class);
+
     private static String SECRET_KEY = "123456";
     private static boolean NO_CHECK_TIME = false;
     private final RateLimiter mLimitCounter = new RateLimiter(10, 500);
+
     public static void setSecretKey(String secretKey) {
         SECRET_KEY = secretKey;
     }
@@ -31,7 +37,7 @@ abstract public class AdminAction extends Action {
         try {
             NO_CHECK_TIME = Boolean.parseBoolean(noCheckTime);
         } catch (Exception e) {
-
+            LOGGER.warn("setNoCheckTime error use default config, noCheckTime is {} ", noCheckTime, e);
         }
     }
 

@@ -9,17 +9,17 @@
 package com.xiaoleilu.loServer.action.admin;
 
 import cn.wildfirechat.common.APIPath;
+import cn.wildfirechat.common.ErrorCode;
+import cn.wildfirechat.pojos.InputGetToken;
+import cn.wildfirechat.pojos.OutputGetIMTokenData;
 import cn.wildfirechat.proto.WFCMessage;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import cn.wildfirechat.pojos.InputGetToken;
-import cn.wildfirechat.pojos.OutputGetIMTokenData;
 import io.moquette.persistence.RPCCenter;
 import io.moquette.persistence.TargetEntry;
 import io.netty.handler.codec.http.FullHttpRequest;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 import java.util.Base64;
@@ -27,7 +27,7 @@ import java.util.concurrent.Executor;
 
 @Route(APIPath.User_Get_Token)
 @HttpMethod("POST")
-public class GetIMTokenAction extends AdminAction {
+public class GetIMTokenAction extends AbstractAdminAction {
 
     @Override
     public boolean isTransactionAction() {
@@ -48,9 +48,9 @@ public class GetIMTokenAction extends AdminAction {
                     ErrorCode errorCode1 = ErrorCode.fromCode(result[0]);
                     if (errorCode1 == ErrorCode.ERROR_CODE_SUCCESS) {
                         //ba errorcode qudiao
-                        byte[] data = new byte[result.length -1];
+                        byte[] data = new byte[result.length - 1];
                         for (int i = 0; i < data.length; i++) {
-                            data[i] = result[i+1];
+                            data[i] = result[i + 1];
                         }
                         String token = Base64.getEncoder().encodeToString(data);
 

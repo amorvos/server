@@ -27,12 +27,24 @@ import win.liyufan.im.Utility;
 
 import java.io.IOException;
 import java.security.MessageDigest;
-import java.sql.*;
-import java.util.*;
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.UUID;
 import java.util.function.Function;
 
 import static cn.wildfirechat.proto.ProtoConstants.PersistFlag.Transparent;
-import static io.moquette.persistence.MemoryMessagesStore.USER_STATUS;
 import static io.moquette.server.Constants.MAX_MESSAGE_QUEUE;
 
 public class DatabaseStore {
@@ -138,7 +150,7 @@ public class DatabaseStore {
                 value = (value == null ? "" : value);
                 out.desc = value;
 
-               return out;
+                return out;
             }
         } catch (SQLException e) {
             // TODO Auto-generated catch block
@@ -284,7 +296,7 @@ public class DatabaseStore {
         return 0;
     }
 
-    synchronized Collection<WFCMessage.GroupMember>  reloadGroupMemberFromDB(HazelcastInstance hzInstance, String groupId) {
+    synchronized Collection<WFCMessage.GroupMember> reloadGroupMemberFromDB(HazelcastInstance hzInstance, String groupId) {
         MultiMap<String, WFCMessage.GroupMember> groupMembers = hzInstance.getMultiMap(MemoryMessagesStore.GROUP_MEMBERS);
         if (groupMembers.get(groupId).size() > 0) {
             return groupMembers.get(groupId);
@@ -450,11 +462,11 @@ public class DatabaseStore {
 
 
     void persistMessage(final WFCMessage.Message message, boolean update) {
-        if(message.getContent().getPersistFlag() == Transparent) {
+        if (message.getContent().getPersistFlag() == Transparent) {
             return;
         }
 
-        mScheduler.execute(()-> {
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -501,11 +513,11 @@ public class DatabaseStore {
     }
 
     void persistSensitiveMessage(final WFCMessage.Message message) {
-        if(message.getContent().getPersistFlag() == Transparent) {
+        if (message.getContent().getPersistFlag() == Transparent) {
             return;
         }
 
-        mScheduler.execute(()-> {
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -571,7 +583,7 @@ public class DatabaseStore {
             connection = DBUtil.getConnection();
             out = new HashMap<>();
             for (Map.Entry<String, List<Long>> entry : messageTableMap.entrySet()) {
-                String sql = "select `_mid`, `_from`, `_type`, `_target`, `_line`, `_data`, `_dt` from " + entry.getKey() +" where _mid in (";
+                String sql = "select `_mid`, `_from`, `_type`, `_target`, `_line`, `_data`, `_dt` from " + entry.getKey() + " where _mid in (";
                 for (int i = 0; i < entry.getValue().size(); i++) {
                     sql += entry.getValue().get(i);
                     if (i != entry.getValue().size() - 1) {
@@ -601,7 +613,7 @@ public class DatabaseStore {
                         builder.setContent(messageContent);
                         builder.setServerTimestamp(resultSet.getTimestamp(index++).getTime());
                         WFCMessage.Message message = builder.build();
-                        out.put(message.getMessageId(),new MessageBundle(message.getMessageId(), message.getFromUser(), null, message));
+                        out.put(message.getMessageId(), new MessageBundle(message.getMessageId(), message.getFromUser(), null, message));
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -611,7 +623,7 @@ public class DatabaseStore {
                     Utility.printExecption(LOG, e);
                 } finally {
                     try {
-                        if (resultSet!=null) {
+                        if (resultSet != null) {
                             resultSet.close();
                         }
                     } catch (SQLException e) {
@@ -632,7 +644,7 @@ public class DatabaseStore {
     }
 
     MessageBundle getMessage(long messageId) {
-        String sql = "select  `_from`, `_type`, `_target`, `_line`, `_data`, `_dt` from " + MessageShardingUtil.getMessageTable(messageId) +" where _mid = ? limit 1";
+        String sql = "select  `_from`, `_type`, `_target`, `_line`, `_data`, `_dt` from " + MessageShardingUtil.getMessageTable(messageId) + " where _mid = ? limit 1";
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -702,7 +714,7 @@ public class DatabaseStore {
     }
 
     List<WFCMessage.Message> loadRemoteMessagesFromTable(String user, WFCMessage.Conversation conversation, long beforeUid, int count, String table) {
-        String sql = "select `_mid`, `_from`, `_type`, `_target`, `_line`, `_data`, `_dt` from " + table +" where";
+        String sql = "select `_mid`, `_from`, `_type`, `_target`, `_line`, `_data`, `_dt` from " + table + " where";
         if (conversation.getType() == ProtoConstants.ConversationType.ConversationType_Private) {
             sql += " _type = ? and _line = ? and _mid < ? and ((_target = ?  and _from = ?) or (_target = ?  and _from = ?))";
         } else {
@@ -758,7 +770,7 @@ public class DatabaseStore {
     }
 
     void persistUserMessage(final String userId, final long messageId, final long messageSeq) {
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -821,7 +833,7 @@ public class DatabaseStore {
     }
 
     void persistUserSetting(final String userId, WFCMessage.UserSettingEntry entry) {
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -931,7 +943,7 @@ public class DatabaseStore {
 
             statement = connection.prepareStatement(sb.toString());
             int index = 1;
-            for (String userId:users) {
+            for (String userId : users) {
                 statement.setString(index++, userId);
             }
 
@@ -947,7 +959,7 @@ public class DatabaseStore {
     }
 
     void persistGroupInfo(final WFCMessage.GroupInfo groupInfo) {
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -1062,13 +1074,13 @@ public class DatabaseStore {
     }
 
     void updateSessionToken(String uid, String cid, String token, boolean voipToken) {
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
                 connection = DBUtil.getConnection();
 
-                String sql ;
+                String sql;
 
                 if (voipToken) {
                     sql = "update t_user_session set `_voip_token` = ?, `_dt` = ? where `_uid` = ? and `_cid` = ?";
@@ -1096,15 +1108,17 @@ public class DatabaseStore {
     }
 
     private boolean strEqual(String left, String right) {
-        if (left == right)
+        if (left == right) {
             return true;
-        if (left == null)
+        }
+        if (left == null) {
             return false;
+        }
         return left.equals(right);
     }
 
     void updateSession(String uid, String cid, MemorySessionStore.Session session, WFCMessage.RouteRequest request) {
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -1229,13 +1243,13 @@ public class DatabaseStore {
     }
 
     void updateGroupMemberCountDt(final String groupId, final int count, final long dt) {
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
                 connection = DBUtil.getConnection();
 
-                String sql ;
+                String sql;
 
                 if (count >= 0) {
                     sql = "update t_group set `_member_count` = ?, `_member_dt` = ? , `_dt` = ? where `_gid` = ?";
@@ -1245,7 +1259,7 @@ public class DatabaseStore {
                 statement = connection.prepareStatement(sql);
 
                 int index = 1;
-                if (count >=0) {
+                if (count >= 0) {
                     statement.setInt(index++, count);
                 }
                 statement.setLong(index++, dt);
@@ -1265,61 +1279,61 @@ public class DatabaseStore {
     }
 
     void persistGroupMember(final String groupId, final List<WFCMessage.GroupMember> memberList) {
-            Connection connection = null;
-            PreparedStatement statement = null;
-            try {
-                connection = DBUtil.getConnection();
-                connection.setAutoCommit(false);
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = DBUtil.getConnection();
+            connection.setAutoCommit(false);
 
-                String sql = "insert into t_group_member (`_gid`" +
-                    ", `_mid`" +
-                    ", `_alias`" +
-                    ", `_type`" +
-                    ", `_dt`) values(?, ?, ?, ?, ?)" +
-                    " ON DUPLICATE KEY UPDATE " +
-                    "`_alias` = ?," +
-                    "`_type` = ?," +
-                    "`_dt` = ?";
+            String sql = "insert into t_group_member (`_gid`" +
+                ", `_mid`" +
+                ", `_alias`" +
+                ", `_type`" +
+                ", `_dt`) values(?, ?, ?, ?, ?)" +
+                " ON DUPLICATE KEY UPDATE " +
+                "`_alias` = ?," +
+                "`_type` = ?," +
+                "`_dt` = ?";
 
-                statement = connection.prepareStatement(sql);
+            statement = connection.prepareStatement(sql);
 
-                for (WFCMessage.GroupMember member : memberList
-                    ) {
-                    int index = 1;
-                    long dt = System.currentTimeMillis();
-                    if (member.getUpdateDt() > 0) {
-                        dt = member.getUpdateDt();
-                    }
-
-                    statement.setString(index++, groupId);
-                    statement.setString(index++, member.getMemberId());
-                    statement.setString(index++, member.getAlias());
-                    statement.setInt(index++, member.getType());
-                    statement.setLong(index++, dt);
-                    statement.setString(index++, member.getAlias());
-                    statement.setInt(index++, member.getType());
-                    statement.setLong(index++, dt);
-                    int count = statement.executeUpdate();
-                    LOG.info("Update rows {}", count);
+            for (WFCMessage.GroupMember member : memberList
+            ) {
+                int index = 1;
+                long dt = System.currentTimeMillis();
+                if (member.getUpdateDt() > 0) {
+                    dt = member.getUpdateDt();
                 }
 
-                connection.commit();
-                connection.setAutoCommit(true);
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                if (connection != null) {
-                    try {
-                        connection.commit();
-                        connection.setAutoCommit(true);
-                    } catch (SQLException e1) {
-                        e1.printStackTrace();
-                    }
-                }
-                e.printStackTrace();
-                Utility.printExecption(LOG, e);
-            } finally {
-                DBUtil.closeDB(connection, statement);
+                statement.setString(index++, groupId);
+                statement.setString(index++, member.getMemberId());
+                statement.setString(index++, member.getAlias());
+                statement.setInt(index++, member.getType());
+                statement.setLong(index++, dt);
+                statement.setString(index++, member.getAlias());
+                statement.setInt(index++, member.getType());
+                statement.setLong(index++, dt);
+                int count = statement.executeUpdate();
+                LOG.info("Update rows {}", count);
             }
+
+            connection.commit();
+            connection.setAutoCommit(true);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            if (connection != null) {
+                try {
+                    connection.commit();
+                    connection.setAutoCommit(true);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            Utility.printExecption(LOG, e);
+        } finally {
+            DBUtil.closeDB(connection, statement);
+        }
     }
 
     int removeGroupMember(String groupId, List<String> groupMembers) {
@@ -1333,7 +1347,7 @@ public class DatabaseStore {
             StringBuilder sqlBuilder = new StringBuilder("update t_group_member set `_type` = ?, `_dt` = ? where `_mid` in (");
             for (int i = 0; i < groupMembers.size(); i++) {
                 sqlBuilder.append("?");
-                if (i != groupMembers.size()-1) {
+                if (i != groupMembers.size() - 1) {
                     sqlBuilder.append(",");
                 }
             }
@@ -1348,7 +1362,7 @@ public class DatabaseStore {
             statement.setInt(index++, ProtoConstants.GroupMemberType.GroupMemberType_Removed);
             statement.setLong(index++, current);
 
-            for (String memberId:groupMembers) {
+            for (String memberId : groupMembers) {
                 statement.setString(index++, memberId);
             }
             statement.setString(index++, groupId);
@@ -1474,7 +1488,7 @@ public class DatabaseStore {
 
     void updateChatroomInfo(String chatroomId, WFCMessage.ChatroomInfo chatroomInfo) {
         LOG.info("Database update chatroom info {}", chatroomId);
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -1526,7 +1540,7 @@ public class DatabaseStore {
 
     void removeChatroomInfo(String chatroomId) {
         LOG.info("Database remove chatroom {}", chatroomId);
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -1591,11 +1605,9 @@ public class DatabaseStore {
                 builder.setDesc(strValue);
 
 
-
                 strValue = rs.getString(index++);
                 strValue = (strValue == null ? "" : strValue);
                 builder.setExtra(strValue);
-
 
 
                 long longValue = rs.getLong(index++);
@@ -1615,7 +1627,7 @@ public class DatabaseStore {
     }
 
     void updateUserPassword(final String userId, final String password) {
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -1650,7 +1662,7 @@ public class DatabaseStore {
     }
 
     void deleteUser(final String userId) {
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -1673,7 +1685,7 @@ public class DatabaseStore {
     }
 
     void deleteRobot(String robotId) {
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -1693,6 +1705,7 @@ public class DatabaseStore {
             }
         });
     }
+
     WFCMessage.Robot getRobot(String robotId) {
         Connection connection = null;
         PreparedStatement statement = null;
@@ -1752,7 +1765,7 @@ public class DatabaseStore {
 
     void updateRobot(final WFCMessage.Robot robot) {
         LOG.info("Database update user info {}", robot.getUid());
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -1804,83 +1817,83 @@ public class DatabaseStore {
 
     void updateUser(final WFCMessage.User user) {
         LOG.info("Database update user info {} {}", user.getUid(), user.getUpdateDt());
-            Connection connection = null;
-            PreparedStatement statement = null;
-            LOG.info("Database update user info {}", user.getDisplayName());
-            try {
-                connection = DBUtil.getConnection();
-                String sql = "insert into t_user (`_uid`" +
-                    ", `_name`" +
-                    ", `_display_name`" +
-                    ", `_portrait`" +
-                    ", `_mobile`" +
-                    ", `_gender`" +
-                    ", `_email`" +
-                    ", `_address`" +
-                    ", `_company`" +
-                    ", `_social`" +
-                    ", `_extra`" +
-                    ", `_type`" +
-                    ", `_dt`) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" +
+        Connection connection = null;
+        PreparedStatement statement = null;
+        LOG.info("Database update user info {}", user.getDisplayName());
+        try {
+            connection = DBUtil.getConnection();
+            String sql = "insert into t_user (`_uid`" +
+                ", `_name`" +
+                ", `_display_name`" +
+                ", `_portrait`" +
+                ", `_mobile`" +
+                ", `_gender`" +
+                ", `_email`" +
+                ", `_address`" +
+                ", `_company`" +
+                ", `_social`" +
+                ", `_extra`" +
+                ", `_type`" +
+                ", `_dt`) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" +
                 " ON DUPLICATE KEY UPDATE `_name`=?" +
-                    ", `_display_name`=?" +
-                    ", `_portrait`=?" +
-                    ", `_mobile`=?" +
-                    ", `_gender`=?" +
-                    ", `_email`=?" +
-                    ", `_address`=?" +
-                    ", `_company`=?" +
-                    ", `_social`=?" +
-                    ", `_extra`=?" +
-                    ", `_type`=?" +
-                    ", `_dt`=?";
+                ", `_display_name`=?" +
+                ", `_portrait`=?" +
+                ", `_mobile`=?" +
+                ", `_gender`=?" +
+                ", `_email`=?" +
+                ", `_address`=?" +
+                ", `_company`=?" +
+                ", `_social`=?" +
+                ", `_extra`=?" +
+                ", `_type`=?" +
+                ", `_dt`=?";
 
-                statement = connection.prepareStatement(sql);
+            statement = connection.prepareStatement(sql);
 
-                int index = 1;
+            int index = 1;
 
-                statement.setString(index++, user.getUid());
-                statement.setString(index++, user.getName());
-                statement.setString(index++, user.getDisplayName());
-                statement.setString(index++, user.getPortrait());
-                statement.setString(index++, user.getMobile());
-                statement.setInt(index++, user.getGender());
-                statement.setString(index++, user.getEmail());
-                statement.setString(index++, user.getAddress());
-                statement.setString(index++, user.getCompany());
-                statement.setString(index++, user.getSocial());
+            statement.setString(index++, user.getUid());
+            statement.setString(index++, user.getName());
+            statement.setString(index++, user.getDisplayName());
+            statement.setString(index++, user.getPortrait());
+            statement.setString(index++, user.getMobile());
+            statement.setInt(index++, user.getGender());
+            statement.setString(index++, user.getEmail());
+            statement.setString(index++, user.getAddress());
+            statement.setString(index++, user.getCompany());
+            statement.setString(index++, user.getSocial());
 
-                statement.setString(index++, user.getExtra());
-                statement.setInt(index++, user.getType());
-                statement.setLong(index++, user.getUpdateDt() == 0 ? System.currentTimeMillis() : user.getUpdateDt());
+            statement.setString(index++, user.getExtra());
+            statement.setInt(index++, user.getType());
+            statement.setLong(index++, user.getUpdateDt() == 0 ? System.currentTimeMillis() : user.getUpdateDt());
 
-                statement.setString(index++, user.getName());
-                statement.setString(index++, user.getDisplayName());
-                statement.setString(index++, user.getPortrait());
-                statement.setString(index++, user.getMobile());
-                statement.setInt(index++, user.getGender());
-                statement.setString(index++, user.getEmail());
-                statement.setString(index++, user.getAddress());
-                statement.setString(index++, user.getCompany());
-                statement.setString(index++, user.getSocial());
+            statement.setString(index++, user.getName());
+            statement.setString(index++, user.getDisplayName());
+            statement.setString(index++, user.getPortrait());
+            statement.setString(index++, user.getMobile());
+            statement.setInt(index++, user.getGender());
+            statement.setString(index++, user.getEmail());
+            statement.setString(index++, user.getAddress());
+            statement.setString(index++, user.getCompany());
+            statement.setString(index++, user.getSocial());
 
-                statement.setString(index++, user.getExtra());
-                statement.setInt(index++, user.getType());
-                statement.setLong(index++, user.getUpdateDt() == 0 ? System.currentTimeMillis() : user.getUpdateDt());
+            statement.setString(index++, user.getExtra());
+            statement.setInt(index++, user.getType());
+            statement.setLong(index++, user.getUpdateDt() == 0 ? System.currentTimeMillis() : user.getUpdateDt());
 
-                int count = statement.executeUpdate();
-                LOG.info("Update rows {}", count);
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                Utility.printExecption(LOG, e);
-            } finally {
-                DBUtil.closeDB(connection, statement);
-            }
+            int count = statement.executeUpdate();
+            LOG.info("Update rows {}", count);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Utility.printExecption(LOG, e);
+        } finally {
+            DBUtil.closeDB(connection, statement);
+        }
     }
 
     void deleteUserStatus(String userId) {
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -1901,7 +1914,7 @@ public class DatabaseStore {
     }
 
     void updateUserStatus(String userId, int status) {
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -1919,7 +1932,7 @@ public class DatabaseStore {
                     int index = 1;
                     statement.setString(index++, userId);
                     statement.setInt(index++, status);
-                    statement.setLong(index++,  System.currentTimeMillis());
+                    statement.setLong(index++, System.currentTimeMillis());
                     statement.setInt(index++, status);
 
                     int count = statement.executeUpdate();
@@ -1944,11 +1957,11 @@ public class DatabaseStore {
             String sql = "INSERT INTO `t_id_generator` (`id`) VALUES (NULL);";
 
             statement = connection.prepareStatement(sql);
-            if(statement.executeUpdate()> 0) {
+            if (statement.executeUpdate() > 0) {
                 sql = "SELECT LAST_INSERT_ID()";
 
                 try {
-                    if (statement!=null) {
+                    if (statement != null) {
                         statement.close();
                     }
                 } catch (Exception e) {
@@ -2117,7 +2130,6 @@ public class DatabaseStore {
             statement = connection.prepareStatement(sql);
 
 
-
             rs = statement.executeQuery();
             Set<String> out = new HashSet<>();
             while (rs.next()) {
@@ -2134,6 +2146,7 @@ public class DatabaseStore {
         }
         return null;
     }
+
     List<FriendData> getPersistFriends(String userId) {
         Connection connection = null;
         PreparedStatement statement = null;
@@ -2234,104 +2247,105 @@ public class DatabaseStore {
     }
 
     void persistFriendRequestUnreadStatus(String userId, long readDt, long updateDt) {
-            Connection connection = null;
-            PreparedStatement statement = null;
-            try {
-                connection = DBUtil.getConnection();
-                String sql = "update t_friend_request set `_dt`=? , `_to_read_status`=?" +
-                    " where " +
-                    "`_friend_uid` = ? and" +
-                    "`_dt` <= ? and" +
-                    "`_to_read_status` = ?";
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = DBUtil.getConnection();
+            String sql = "update t_friend_request set `_dt`=? , `_to_read_status`=?" +
+                " where " +
+                "`_friend_uid` = ? and" +
+                "`_dt` <= ? and" +
+                "`_to_read_status` = ?";
 
-                statement = connection.prepareStatement(sql);
-                int index = 1;
-                statement.setLong(index++, updateDt);
-                statement.setBoolean(index++, true);
-                statement.setString(index++, userId);
-                statement.setLong(index++, readDt);
-                statement.setBoolean(index++, false);
-                int count = statement.executeUpdate();
-                LOG.info("Update rows {}", count);
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                Utility.printExecption(LOG, e);
-            } finally {
-                DBUtil.closeDB(connection, statement);
-            }
+            statement = connection.prepareStatement(sql);
+            int index = 1;
+            statement.setLong(index++, updateDt);
+            statement.setBoolean(index++, true);
+            statement.setString(index++, userId);
+            statement.setLong(index++, readDt);
+            statement.setBoolean(index++, false);
+            int count = statement.executeUpdate();
+            LOG.info("Update rows {}", count);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Utility.printExecption(LOG, e);
+        } finally {
+            DBUtil.closeDB(connection, statement);
+        }
     }
+
     //
     void persistOrUpdateFriendRequest(final WFCMessage.FriendRequest request) {
-            Connection connection = null;
-            PreparedStatement statement = null;
-            try {
-                connection = DBUtil.getConnection();
-                String sql = "insert into t_friend_request (`_uid`, `_friend_uid`, `_reason`, `_status`, `_dt`, `_from_read_status`, `_to_read_status`) values(?, ?, ?, ?, ?, ?, ?)" +
-                    " ON DUPLICATE KEY UPDATE " +
-                    "`_reason` = ?," +
-                    "`_status` = ?," +
-                    "`_dt` = ?," +
-                    "`_from_read_status` = ?," +
-                    "`_to_read_status` = ?";
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = DBUtil.getConnection();
+            String sql = "insert into t_friend_request (`_uid`, `_friend_uid`, `_reason`, `_status`, `_dt`, `_from_read_status`, `_to_read_status`) values(?, ?, ?, ?, ?, ?, ?)" +
+                " ON DUPLICATE KEY UPDATE " +
+                "`_reason` = ?," +
+                "`_status` = ?," +
+                "`_dt` = ?," +
+                "`_from_read_status` = ?," +
+                "`_to_read_status` = ?";
 
-                statement = connection.prepareStatement(sql);
-                int index = 1;
-                statement.setString(index++, request.getFromUid());
-                statement.setString(index++, request.getToUid());
-                statement.setString(index++, request.getReason());
-                statement.setInt(index++, request.getStatus());
-                statement.setLong(index++, request.getUpdateDt());
-                statement.setInt(index++, request.getFromReadStatus() ? 1 : 0);
-                statement.setInt(index++, request.getToReadStatus() ? 1 : 0);
+            statement = connection.prepareStatement(sql);
+            int index = 1;
+            statement.setString(index++, request.getFromUid());
+            statement.setString(index++, request.getToUid());
+            statement.setString(index++, request.getReason());
+            statement.setInt(index++, request.getStatus());
+            statement.setLong(index++, request.getUpdateDt());
+            statement.setInt(index++, request.getFromReadStatus() ? 1 : 0);
+            statement.setInt(index++, request.getToReadStatus() ? 1 : 0);
 
-                statement.setString(index++, request.getReason());
-                statement.setInt(index++, request.getStatus());
-                statement.setLong(index++, request.getUpdateDt());
-                statement.setInt(index++, request.getFromReadStatus() ? 1 : 0);
-                statement.setInt(index++, request.getToReadStatus() ? 1 : 0);
-                int count = statement.executeUpdate();
-                LOG.info("Update rows {}", count);
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            statement.setString(index++, request.getReason());
+            statement.setInt(index++, request.getStatus());
+            statement.setLong(index++, request.getUpdateDt());
+            statement.setInt(index++, request.getFromReadStatus() ? 1 : 0);
+            statement.setInt(index++, request.getToReadStatus() ? 1 : 0);
+            int count = statement.executeUpdate();
+            LOG.info("Update rows {}", count);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
             Utility.printExecption(LOG, e);
-            } finally {
-                DBUtil.closeDB(connection, statement);
-            }
+        } finally {
+            DBUtil.closeDB(connection, statement);
+        }
     }
 
     void persistOrUpdateFriendData(final FriendData request) {
-            Connection connection = null;
-            PreparedStatement statement = null;
-            try {
-                connection = DBUtil.getConnection();
-                String sql = "insert into t_friend (`_uid`, `_friend_uid`, `_alias`, `_state`, `_dt`) values(?, ?, ?, ?, ?)" +
-                    " ON DUPLICATE KEY UPDATE " +
-                    "`_alias` = ?," +
-                    "`_state` = ?," +
-                    "`_dt` = ?";
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = DBUtil.getConnection();
+            String sql = "insert into t_friend (`_uid`, `_friend_uid`, `_alias`, `_state`, `_dt`) values(?, ?, ?, ?, ?)" +
+                " ON DUPLICATE KEY UPDATE " +
+                "`_alias` = ?," +
+                "`_state` = ?," +
+                "`_dt` = ?";
 
 
-                statement = connection.prepareStatement(sql);
-                int index = 1;
-                statement.setString(index++, request.getUserId());
-                statement.setString(index++, request.getFriendUid());
-                statement.setString(index++, request.getAlias());
-                statement.setInt(index++, request.getState());
-                statement.setLong(index++, request.getTimestamp());
-                statement.setString(index++, request.getAlias());
-                statement.setInt(index++, request.getState());
-                statement.setLong(index++, request.getTimestamp());
-                int count = statement.executeUpdate();
-                LOG.info("Update rows {}", count);
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            statement = connection.prepareStatement(sql);
+            int index = 1;
+            statement.setString(index++, request.getUserId());
+            statement.setString(index++, request.getFriendUid());
+            statement.setString(index++, request.getAlias());
+            statement.setInt(index++, request.getState());
+            statement.setLong(index++, request.getTimestamp());
+            statement.setString(index++, request.getAlias());
+            statement.setInt(index++, request.getState());
+            statement.setLong(index++, request.getTimestamp());
+            int count = statement.executeUpdate();
+            LOG.info("Update rows {}", count);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
             Utility.printExecption(LOG, e);
-            } finally {
-                DBUtil.closeDB(connection, statement);
-            }
+        } finally {
+            DBUtil.closeDB(connection, statement);
+        }
     }
 
     boolean removeGroupInfoFromDB(String groupId) {
@@ -2379,73 +2393,73 @@ public class DatabaseStore {
 
     void updateChannelInfo(final WFCMessage.ChannelInfo channelInfo) {
         LOG.info("Database update channel info {} {}", channelInfo.getTargetId(), channelInfo.getUpdateDt());
-            Connection connection = null;
-            PreparedStatement statement = null;
-            try {
-                connection = DBUtil.getConnection();
-                String sql = "insert into t_channel (`_cid`" +
-                    ", `_name`" +
-                    ", `_portrait`" +
-                    ", `_owner`" +
-                    ", `_status`" +
-                    ", `_desc`" +
-                    ", `_extra`" +
-                    ", `_secret`" +
-                    ", `_callback`" +
-                    ", `_automatic`" +
-                    ", `_dt`) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" +
-                    " ON DUPLICATE KEY UPDATE `_name`=?" +
-                    ", `_portrait`=?" +
-                    ", `_owner`=?" +
-                    ", `_status`=?" +
-                    ", `_desc`=?" +
-                    ", `_extra`=?" +
-                    ", `_secret`=?" +
-                    ", `_callback`=?" +
-                    ", `_automatic`=?" +
-                    ", `_dt`=?";
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = DBUtil.getConnection();
+            String sql = "insert into t_channel (`_cid`" +
+                ", `_name`" +
+                ", `_portrait`" +
+                ", `_owner`" +
+                ", `_status`" +
+                ", `_desc`" +
+                ", `_extra`" +
+                ", `_secret`" +
+                ", `_callback`" +
+                ", `_automatic`" +
+                ", `_dt`) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" +
+                " ON DUPLICATE KEY UPDATE `_name`=?" +
+                ", `_portrait`=?" +
+                ", `_owner`=?" +
+                ", `_status`=?" +
+                ", `_desc`=?" +
+                ", `_extra`=?" +
+                ", `_secret`=?" +
+                ", `_callback`=?" +
+                ", `_automatic`=?" +
+                ", `_dt`=?";
 
-                statement = connection.prepareStatement(sql);
+            statement = connection.prepareStatement(sql);
 
-                int index = 1;
+            int index = 1;
 
-                statement.setString(index++, channelInfo.getTargetId());
-                statement.setString(index++, channelInfo.getName());
-                statement.setString(index++, channelInfo.getPortrait());
-                statement.setString(index++, channelInfo.getOwner());
-                statement.setInt(index++, channelInfo.getStatus());
-                statement.setString(index++, channelInfo.getDesc());
-                statement.setString(index++, channelInfo.getExtra());
-                statement.setString(index++, channelInfo.getSecret());
-                statement.setString(index++, channelInfo.getCallback());
-                statement.setInt(index++, channelInfo.getAutomatic());
-                statement.setLong(index++, channelInfo.getUpdateDt() == 0 ? System.currentTimeMillis() : channelInfo.getUpdateDt());
+            statement.setString(index++, channelInfo.getTargetId());
+            statement.setString(index++, channelInfo.getName());
+            statement.setString(index++, channelInfo.getPortrait());
+            statement.setString(index++, channelInfo.getOwner());
+            statement.setInt(index++, channelInfo.getStatus());
+            statement.setString(index++, channelInfo.getDesc());
+            statement.setString(index++, channelInfo.getExtra());
+            statement.setString(index++, channelInfo.getSecret());
+            statement.setString(index++, channelInfo.getCallback());
+            statement.setInt(index++, channelInfo.getAutomatic());
+            statement.setLong(index++, channelInfo.getUpdateDt() == 0 ? System.currentTimeMillis() : channelInfo.getUpdateDt());
 
-                statement.setString(index++, channelInfo.getName());
-                statement.setString(index++, channelInfo.getPortrait());
-                statement.setString(index++, channelInfo.getOwner());
-                statement.setInt(index++, channelInfo.getStatus());
-                statement.setString(index++, channelInfo.getDesc());
-                statement.setString(index++, channelInfo.getExtra());
-                statement.setString(index++, channelInfo.getSecret());
-                statement.setString(index++, channelInfo.getCallback());
-                statement.setInt(index++, channelInfo.getAutomatic());
-                statement.setLong(index++, channelInfo.getUpdateDt() == 0 ? System.currentTimeMillis() : channelInfo.getUpdateDt());
+            statement.setString(index++, channelInfo.getName());
+            statement.setString(index++, channelInfo.getPortrait());
+            statement.setString(index++, channelInfo.getOwner());
+            statement.setInt(index++, channelInfo.getStatus());
+            statement.setString(index++, channelInfo.getDesc());
+            statement.setString(index++, channelInfo.getExtra());
+            statement.setString(index++, channelInfo.getSecret());
+            statement.setString(index++, channelInfo.getCallback());
+            statement.setInt(index++, channelInfo.getAutomatic());
+            statement.setLong(index++, channelInfo.getUpdateDt() == 0 ? System.currentTimeMillis() : channelInfo.getUpdateDt());
 
-                int count = statement.executeUpdate();
-                LOG.info("Update rows {}", count);
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                Utility.printExecption(LOG, e);
-            } finally {
-                DBUtil.closeDB(connection, statement);
-            }
+            int count = statement.executeUpdate();
+            LOG.info("Update rows {}", count);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Utility.printExecption(LOG, e);
+        } finally {
+            DBUtil.closeDB(connection, statement);
+        }
     }
 
     void removeChannelInfo(final String channelId) {
         LOG.info("Database remove channel {}", channelId);
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -2549,7 +2563,7 @@ public class DatabaseStore {
 
 
     void persistChannelListener(final String groupId, final List<String> memberList) {
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -2715,7 +2729,7 @@ public class DatabaseStore {
 
     void updateChannelListener(final String channelId, final String listener, final boolean listen) {
         LOG.info("Database remove channel {}", channelId);
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -2786,7 +2800,7 @@ public class DatabaseStore {
 
     void deleteSensitiveWord(final String word) {
         LOG.info("delete sensitive word {}", word);
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -2809,7 +2823,7 @@ public class DatabaseStore {
     }
 
     void persistSensitiveWord(final String word) {
-        mScheduler.execute(()->{
+        mScheduler.execute(() -> {
             Connection connection = null;
             PreparedStatement statement = null;
             try {
@@ -2835,7 +2849,7 @@ public class DatabaseStore {
         if (DBUtil.IsEmbedDB) {
             return "t_user_messages";
         }
-        int hashId = Math.abs(uid.hashCode())%128;
+        int hashId = Math.abs(uid.hashCode()) % 128;
         return "t_user_messages_" + hashId;
     }
 }

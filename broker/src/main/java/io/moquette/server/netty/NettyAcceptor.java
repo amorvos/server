@@ -19,12 +19,25 @@ package io.moquette.server.netty;
 import io.moquette.BrokerConstants;
 import io.moquette.server.ServerAcceptor;
 import io.moquette.server.config.IConfig;
-import io.moquette.server.netty.metrics.*;
+import io.moquette.server.netty.metrics.BytesMetrics;
+import io.moquette.server.netty.metrics.BytesMetricsCollector;
+import io.moquette.server.netty.metrics.BytesMetricsHandler;
+import io.moquette.server.netty.metrics.MQTTMessageLogger;
+import io.moquette.server.netty.metrics.MessageMetrics;
+import io.moquette.server.netty.metrics.MessageMetricsCollector;
+import io.moquette.server.netty.metrics.MessageMetricsHandler;
 import io.moquette.spi.impl.ProtocolProcessor;
 import io.moquette.spi.security.ISslContextCreator;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandler;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -36,7 +49,6 @@ import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
-import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.mqtt.MqttDecoder;
@@ -46,13 +58,18 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import static io.moquette.BrokerConstants.*;
+
+import static io.moquette.BrokerConstants.DISABLED_PORT_BIND;
+import static io.moquette.BrokerConstants.PORT_PROPERTY_NAME;
+import static io.moquette.BrokerConstants.SSL_PORT_PROPERTY_NAME;
+import static io.moquette.BrokerConstants.WSS_PORT_PROPERTY_NAME;
 import static io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE;
 
 public class NettyAcceptor implements ServerAcceptor {
@@ -63,7 +80,7 @@ public class NettyAcceptor implements ServerAcceptor {
 
         @Override
         protected void decode(ChannelHandlerContext chc, BinaryWebSocketFrame frame, List<Object> out)
-                throws Exception {
+            throws Exception {
             // convert the frame to a ByteBuf
             ByteBuf bb = frame.content();
             // System.out.println("WebSocketFrameToByteBufDecoder decode - " +
@@ -110,18 +127,18 @@ public class NettyAcceptor implements ServerAcceptor {
 
     @Override
     public void initialize(ProtocolProcessor processor, IConfig props, ISslContextCreator sslCtxCreator)
-            throws IOException {
+        throws IOException {
         LOG.info("Initializing Netty acceptor...");
 
         nettySoBacklog = Integer.parseInt(props.getProperty(BrokerConstants.NETTY_SO_BACKLOG_PROPERTY_NAME, "128"));
         nettySoReuseaddr = Boolean
-                .parseBoolean(props.getProperty(BrokerConstants.NETTY_SO_REUSEADDR_PROPERTY_NAME, "true"));
+            .parseBoolean(props.getProperty(BrokerConstants.NETTY_SO_REUSEADDR_PROPERTY_NAME, "true"));
         nettyTcpNodelay = Boolean
-                .parseBoolean(props.getProperty(BrokerConstants.NETTY_TCP_NODELAY_PROPERTY_NAME, "true"));
+            .parseBoolean(props.getProperty(BrokerConstants.NETTY_TCP_NODELAY_PROPERTY_NAME, "true"));
         nettySoKeepalive = Boolean
-                .parseBoolean(props.getProperty(BrokerConstants.NETTY_SO_KEEPALIVE_PROPERTY_NAME, "true"));
+            .parseBoolean(props.getProperty(BrokerConstants.NETTY_SO_KEEPALIVE_PROPERTY_NAME, "true"));
         nettyChannelTimeoutSeconds = Integer
-                .parseInt(props.getProperty(BrokerConstants.NETTY_CHANNEL_TIMEOUT_SECONDS_PROPERTY_NAME, "10"));
+            .parseInt(props.getProperty(BrokerConstants.NETTY_CHANNEL_TIMEOUT_SECONDS_PROPERTY_NAME, "10"));
 
         boolean epoll = Boolean.parseBoolean(props.getProperty(BrokerConstants.NETTY_EPOLL_PROPERTY_NAME, "false"));
         if (epoll) {
@@ -161,19 +178,19 @@ public class NettyAcceptor implements ServerAcceptor {
         LOG.info("Initializing server. Protocol={}", protocol);
         ServerBootstrap b = new ServerBootstrap();
         b.group(m_bossGroup, m_workerGroup).channel(channelClass)
-                .childHandler(new ChannelInitializer<SocketChannel>() {
+            .childHandler(new ChannelInitializer<SocketChannel>() {
 
-                    @Override
-                    public void initChannel(SocketChannel ch) throws Exception {
-                        ChannelPipeline pipeline = ch.pipeline();
-                        try {
-                            pipeliner.init(pipeline);
-                        } catch (Throwable th) {
-                            LOG.error("Severe error during pipeline creation", th);
-                            throw th;
-                        }
+                @Override
+                public void initChannel(SocketChannel ch) throws Exception {
+                    ChannelPipeline pipeline = ch.pipeline();
+                    try {
+                        pipeliner.init(pipeline);
+                    } catch (Throwable th) {
+                        LOG.error("Severe error during pipeline creation", th);
+                        throw th;
                     }
-                })
+                }
+            })
             .option(ChannelOption.SO_BACKLOG, 10240) // 服务端可连接队列大小
             .option(ChannelOption.SO_BACKLOG, nettySoBacklog)
             .option(ChannelOption.SO_REUSEADDR, nettySoReuseaddr)
@@ -226,7 +243,7 @@ public class NettyAcceptor implements ServerAcceptor {
     }
 
     private void initializeSSLTCPTransport(final NettyMQTTHandler handler, IConfig props, final SSLContext sslContext)
-            throws IOException {
+        throws IOException {
         LOG.info("Configuring SSL MQTT transport");
         String sslPortProp = props.getProperty(SSL_PORT_PROPERTY_NAME, DISABLED_PORT_BIND);
         if (DISABLED_PORT_BIND.equals(sslPortProp)) {
@@ -262,7 +279,7 @@ public class NettyAcceptor implements ServerAcceptor {
     }
 
     private void initializeWSSTransport(final NettyMQTTHandler handler, IConfig props, final SSLContext sslContext)
-            throws IOException {
+        throws IOException {
         LOG.info("Configuring secure websocket MQTT transport");
         String sslPortProp = props.getProperty(WSS_PORT_PROPERTY_NAME, DISABLED_PORT_BIND);
         if (DISABLED_PORT_BIND.equals(sslPortProp)) {
@@ -285,7 +302,7 @@ public class NettyAcceptor implements ServerAcceptor {
                 pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                 pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
                 pipeline.addLast("webSocketHandler",
-                        new WebSocketServerProtocolHandler("/org/fusesource/mqtt", MQTT_SUBPROTOCOL_CSV_LIST));
+                    new WebSocketServerProtocolHandler("/org/fusesource/mqtt", MQTT_SUBPROTOCOL_CSV_LIST));
                 pipeline.addLast("ws2bytebufDecoder", new WebSocketFrameToByteBufDecoder());
                 pipeline.addLast("bytebuf2wsEncoder", new ByteBufToWebSocketFrameEncoder());
                 pipeline.addFirst("idleStateHandler", new IdleStateHandler(nettyChannelTimeoutSeconds, 0, 0));
@@ -300,6 +317,7 @@ public class NettyAcceptor implements ServerAcceptor {
         });
     }
 
+    @Override
     public void close() {
         LOG.info("Closing Netty acceptor...");
         if (m_workerGroup == null || m_bossGroup == null) {

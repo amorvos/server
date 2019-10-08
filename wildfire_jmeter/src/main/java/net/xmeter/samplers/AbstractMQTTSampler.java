@@ -1,8 +1,9 @@
 package net.xmeter.samplers;
 
-import com.google.gson.Gson;
 import cn.wildfirechat.pojos.InputGetToken;
 import cn.wildfirechat.pojos.OutputGetIMTokenData;
+import com.google.gson.Gson;
+import net.xmeter.Constants;
 import net.xmeter.IMResult;
 import net.xmeter.Util;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -13,8 +14,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.jmeter.samplers.AbstractSampler;
-
-import net.xmeter.Constants;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 
@@ -25,102 +24,102 @@ import java.nio.charset.Charset;
 
 public abstract class AbstractMQTTSampler extends AbstractSampler implements Constants {
     private transient static Logger logger = LoggingManager.getLoggerForClass();
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 7163793218595455807L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 7163793218595455807L;
 
-	public String getServer() {
-		return getPropertyAsString(SERVER, DEFAULT_SERVER);
-	}
+    public String getServer() {
+        return getPropertyAsString(SERVER, DEFAULT_SERVER);
+    }
 
-	public void setServer(String server) {
-		setProperty(SERVER, server);
-	}
-	
-	public String getMqttVersion() {
-		return getPropertyAsString(MQTT_VERSION, DEFAULT_MQTT_VERSION);
-	}
+    public void setServer(String server) {
+        setProperty(SERVER, server);
+    }
 
-	public String getPort() {
-		return getPropertyAsString(PORT, DEFAULT_PORT);
-	}
+    public String getMqttVersion() {
+        return getPropertyAsString(MQTT_VERSION, DEFAULT_MQTT_VERSION);
+    }
 
-	public void setPort(String port) {
-		setProperty(PORT, port);
-	}
+    public String getPort() {
+        return getPropertyAsString(PORT, DEFAULT_PORT);
+    }
 
-	public boolean isConnectionShare() {
-		return getPropertyAsBoolean(CONN_SHARE_CONNECTION, DEFAULT_CONNECTION_SHARE);
-	}
-	
-	public void setConnectionShare(boolean shared) {
-		setProperty(CONN_SHARE_CONNECTION, shared);
-	}
-	
-	public String getConnTimeout() {
-		return getPropertyAsString(CONN_TIMEOUT, DEFAULT_CONN_TIME_OUT);
-	}
+    public void setPort(String port) {
+        setProperty(PORT, port);
+    }
 
-	public void setConnTimeout(String connTimeout) {
-		setProperty(CONN_TIMEOUT, connTimeout);
-	}
+    public boolean isConnectionShare() {
+        return getPropertyAsBoolean(CONN_SHARE_CONNECTION, DEFAULT_CONNECTION_SHARE);
+    }
 
-	public String getProtocol() {
-		return getPropertyAsString(PROTOCOL, DEFAULT_PROTOCOL);
-	}
+    public void setConnectionShare(boolean shared) {
+        setProperty(CONN_SHARE_CONNECTION, shared);
+    }
 
-	public String getConnPrefix() {
-		return getPropertyAsString(CONN_CLIENT_ID_PREFIX, DEFAULT_CONN_PREFIX_FOR_CONN);
-	}
+    public String getConnTimeout() {
+        return getPropertyAsString(CONN_TIMEOUT, DEFAULT_CONN_TIME_OUT);
+    }
 
-	public void setConnPrefix(String connPrefix) {
-	    logger.info("set connprefix:" + connPrefix);
-		setProperty(CONN_CLIENT_ID_PREFIX, connPrefix);
-	}
+    public void setConnTimeout(String connTimeout) {
+        setProperty(CONN_TIMEOUT, connTimeout);
+    }
 
-	public String getConnKeepAlive() {
-		return getPropertyAsString(CONN_KEEP_ALIVE, DEFAULT_CONN_KEEP_ALIVE);
-	}
+    public String getProtocol() {
+        return getPropertyAsString(PROTOCOL, DEFAULT_PROTOCOL);
+    }
 
-	public void setConnKeepAlive(String connKeepAlive) {
-		setProperty(CONN_KEEP_ALIVE, connKeepAlive);
-	}
-	
-	public boolean isClientIdSuffix() {
-		return getPropertyAsBoolean(CONN_CLIENT_ID_SUFFIX, DEFAULT_ADD_CLIENT_ID_SUFFIX);
-	}
-	
-	public void setClientIdSuffix(boolean clientIdSuffix) {
-		setProperty(CONN_CLIENT_ID_SUFFIX, clientIdSuffix);
-	}
+    public String getConnPrefix() {
+        return getPropertyAsString(CONN_CLIENT_ID_PREFIX, DEFAULT_CONN_PREFIX_FOR_CONN);
+    }
 
-	public String getConnKeepTime() {
-		return getPropertyAsString(CONN_KEEP_TIME, DEFAULT_CONN_KEEP_TIME);
-	}
+    public void setConnPrefix(String connPrefix) {
+        logger.info("set connprefix:" + connPrefix);
+        setProperty(CONN_CLIENT_ID_PREFIX, connPrefix);
+    }
 
-	public void setConnKeepTime(String connKeepTime) {
-		setProperty(CONN_KEEP_TIME, connKeepTime);
-	}
+    public String getConnKeepAlive() {
+        return getPropertyAsString(CONN_KEEP_ALIVE, DEFAULT_CONN_KEEP_ALIVE);
+    }
 
-	public String getConnAttamptMax() {
-		return getPropertyAsString(CONN_ATTAMPT_MAX, DEFAULT_CONN_ATTAMPT_MAX);
-	}
+    public void setConnKeepAlive(String connKeepAlive) {
+        setProperty(CONN_KEEP_ALIVE, connKeepAlive);
+    }
 
-	public void setConnAttamptMax(String connAttamptMax) {
-		setProperty(CONN_ATTAMPT_MAX, connAttamptMax);
-	}
+    public boolean isClientIdSuffix() {
+        return getPropertyAsBoolean(CONN_CLIENT_ID_SUFFIX, DEFAULT_ADD_CLIENT_ID_SUFFIX);
+    }
 
-	public String getConnReconnAttamptMax() {
-		return getPropertyAsString(CONN_RECONN_ATTAMPT_MAX, DEFAULT_CONN_RECONN_ATTAMPT_MAX);
-	}
+    public void setClientIdSuffix(boolean clientIdSuffix) {
+        setProperty(CONN_CLIENT_ID_SUFFIX, clientIdSuffix);
+    }
 
-	public void setConnReconnAttamptMax(String connReconnAttamptMax) {
-		setProperty(CONN_RECONN_ATTAMPT_MAX, connReconnAttamptMax);
-	}
+    public String getConnKeepTime() {
+        return getPropertyAsString(CONN_KEEP_TIME, DEFAULT_CONN_KEEP_TIME);
+    }
+
+    public void setConnKeepTime(String connKeepTime) {
+        setProperty(CONN_KEEP_TIME, connKeepTime);
+    }
+
+    public String getConnAttamptMax() {
+        return getPropertyAsString(CONN_ATTAMPT_MAX, DEFAULT_CONN_ATTAMPT_MAX);
+    }
+
+    public void setConnAttamptMax(String connAttamptMax) {
+        setProperty(CONN_ATTAMPT_MAX, connAttamptMax);
+    }
+
+    public String getConnReconnAttamptMax() {
+        return getPropertyAsString(CONN_RECONN_ATTAMPT_MAX, DEFAULT_CONN_RECONN_ATTAMPT_MAX);
+    }
+
+    public void setConnReconnAttamptMax(String connReconnAttamptMax) {
+        setProperty(CONN_RECONN_ATTAMPT_MAX, connReconnAttamptMax);
+    }
 
     public String getUserNameProperty() {
-	    return getPropertyAsString(USER_NAME_AUTH, "").trim();
+        return getPropertyAsString(USER_NAME_AUTH, "").trim();
     }
 
     private String userName;
@@ -138,9 +137,9 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
     }
 
 
-	public void setUserNameAuth(String userName) {
-		setProperty(USER_NAME_AUTH, userName);
-	}
+    public void setUserNameAuth(String userName) {
+        setProperty(USER_NAME_AUTH, userName);
+    }
 
     public void setUserName(String userName) {
         this.userName = userName;
@@ -150,34 +149,34 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
         return getPropertyAsBoolean(USER_NAME_PREFIX);
     }
 
-	public void setUserNamePrefix(boolean prefix) {
+    public void setUserNamePrefix(boolean prefix) {
         setProperty(USER_NAME_PREFIX, prefix);
     }
-	
-	public boolean isKeepTimeShow() {
-		return false;
-	}
-	
-	public boolean isConnectionShareShow() {
-		return false;
-	}
 
-	private String clientId;
+    public boolean isKeepTimeShow() {
+        return false;
+    }
 
-	protected String getClientId() {
-		if (clientId == null) {
-			if (isClientIdSuffix()) {
-				clientId = Util.generateClientId(getConnPrefix());
-			} else {
-				clientId = getConnPrefix();
-			}
-		}
-		return clientId;
-	}
+    public boolean isConnectionShareShow() {
+        return false;
+    }
 
-	protected String mqttServerIp;
-	protected long mqttServerPort;
-    private static byte[] commonSecret= {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x78,0x79,0x7A,0x7B,0x7C,0x7D,0x7E,0x7F};
+    private String clientId;
+
+    protected String getClientId() {
+        if (clientId == null) {
+            if (isClientIdSuffix()) {
+                clientId = Util.generateClientId(getConnPrefix());
+            } else {
+                clientId = getConnPrefix();
+            }
+        }
+        return clientId;
+    }
+
+    protected String mqttServerIp;
+    protected long mqttServerPort;
+    private static byte[] commonSecret = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E, 0x7F};
     protected String privateSecret;
     protected String token;
 
@@ -188,7 +187,7 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
         try {
             HttpClient httpClient = HttpClientBuilder.create().build();
 
-            int nonce = (int)(Math.random() * 100000 + 3);
+            int nonce = (int) (Math.random() * 100000 + 3);
             long timestamp = System.currentTimeMillis();
             String str = nonce + "|" + adminSecret + "|" + timestamp;
             String sign = DigestUtils.sha1Hex(str);
@@ -202,7 +201,7 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
             post.setHeader("sign", sign);
 
             String jsonStr = new Gson().toJson(new InputGetToken(userId, clientId));
-            logger.info("http request content: " +  jsonStr);
+            logger.info("http request content: " + jsonStr);
 
             StringEntity entity = new StringEntity(jsonStr, Charset.forName("UTF-8"));
             entity.setContentEncoding("UTF-8");
@@ -211,12 +210,12 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
             HttpResponse response = httpClient.execute(post);
 
             int statusCode = response.getStatusLine().getStatusCode();
-            if(statusCode != HttpStatus.SC_OK){
+            if (statusCode != HttpStatus.SC_OK) {
                 logger.info("Request error: " + statusCode);
                 throw new Exception("Http request error with code:" + statusCode);
-            }else{
+            } else {
                 BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity()
-                    .getContent(),"utf-8"));
+                    .getContent(), "utf-8"));
                 StringBuffer sb = new StringBuffer();
                 String line;
                 String NL = System.getProperty("line.separator");
@@ -241,8 +240,8 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }finally{
-            if(post != null){
+        } finally {
+            if (post != null) {
                 post.releaseConnection();
             }
         }

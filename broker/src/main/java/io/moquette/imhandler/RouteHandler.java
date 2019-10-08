@@ -8,12 +8,12 @@
 
 package io.moquette.imhandler;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.WFCMessage;
 import com.hazelcast.core.Member;
 import io.moquette.spi.ClientSession;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 import static io.moquette.BrokerConstants.HZ_Cluster_Node_External_IP;

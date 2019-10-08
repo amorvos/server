@@ -19,12 +19,15 @@ package io.moquette.spi.impl;
 import io.moquette.BrokerConstants;
 import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.Interceptor;
-import io.moquette.interception.messages.*;
+import io.moquette.interception.messages.InterceptAcknowledgedMessage;
+import io.moquette.interception.messages.InterceptConnectMessage;
+import io.moquette.interception.messages.InterceptConnectionLostMessage;
+import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.server.config.IConfig;
 import io.netty.handler.codec.mqtt.MqttConnectMessage;
-import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +35,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
 import static io.moquette.logging.LoggingUtils.getInterceptorIds;
 
 /**
@@ -92,7 +96,7 @@ final class BrokerInterceptor implements Interceptor {
     public void notifyClientConnected(final MqttConnectMessage msg) {
         for (final InterceptHandler handler : this.handlers.get(InterceptConnectMessage.class)) {
             LOG.debug("Sending MQTT CONNECT message to interceptor. CId={}, interceptorId={}",
-                    msg.payload().clientIdentifier(), handler.getID());
+                msg.payload().clientIdentifier(), handler.getID());
             executor.execute(() -> handler.onConnect(new InterceptConnectMessage(msg)));
         }
     }

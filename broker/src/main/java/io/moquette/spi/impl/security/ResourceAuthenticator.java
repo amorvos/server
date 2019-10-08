@@ -21,6 +21,7 @@ import io.moquette.spi.security.IAuthenticator;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -33,13 +34,13 @@ import java.util.Map;
 /**
  * Load user credentials from a text resource. Each line of the file is formatted as
  * "[username]:[sha256(password)]". The username mustn't contains : char.
- *
+ * <p>
  * To encode your password from command line on Linux systems, you could use:
  *
  * <pre>
  *     echo -n "yourpassword" | sha256sum
  * </pre>
- *
+ * <p>
  * NB -n is important because echo append a newline by default at the of string. -n avoid this
  * behaviour.
  */
@@ -70,8 +71,8 @@ public class ResourceAuthenticator implements IAuthenticator {
             LOG.warn(String.format("Trying to parse directory %s", resourceName));
         } catch (ParseException pex) {
             LOG.warn(
-                    String.format("Format error in parsing password %s %s", resourceLoader.getName(), resourceName),
-                    pex);
+                String.format("Format error in parsing password %s %s", resourceLoader.getName(), resourceName),
+                pex);
         }
     }
 

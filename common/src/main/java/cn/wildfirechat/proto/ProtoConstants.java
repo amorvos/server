@@ -133,8 +133,6 @@ public class ProtoConstants {
     }
 
 
-
-
     public static final int MESSAGE_CONTENT_TYPE_CREATE_GROUP = 104;
     public static final int MESSAGE_CONTENT_TYPE_ADD_GROUP_MEMBER = 105;
     public static final int MESSAGE_CONTENT_TYPE_KICKOF_GROUP_MEMBER = 106;

@@ -21,7 +21,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 
 @Route(APIPath.User_Get_Blocked_List)
 @HttpMethod("POST")
-public class GetUserBlockListAction extends AdminAction {
+public class GetUserBlockListAction extends AbstractAdminAction {
 
     @Override
     public boolean isTransactionAction() {

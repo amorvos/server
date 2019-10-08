@@ -9,11 +9,11 @@
 package win.liyufan.im;
 
 public interface IMTopic {
-	String SendMessageTopic = "MS";
+    String SendMessageTopic = "MS";
     String MultiCastMessageTopic = "MMC";
     String RecallMessageTopic = "MR";
-	String PullMessageTopic = "MP";
-	String NotifyMessageTopic = "MN";
+    String PullMessageTopic = "MP";
+    String NotifyMessageTopic = "MN";
     String NotifyRecallMessageTopic = "RMN";
     String BroadcastMessageTopic = "MBC";
 
@@ -22,11 +22,11 @@ public interface IMTopic {
     String NotifyUserSettingTopic = "UN";
 
     String CreateGroupTopic = "GC";
-	String AddGroupMemberTopic = "GAM";
-	String KickoffGroupMemberTopic = "GKM";
-	String QuitGroupTopic = "GQ";
-	String DismissGroupTopic = "GD";
-	String ModifyGroupInfoTopic = "GMI";
+    String AddGroupMemberTopic = "GAM";
+    String KickoffGroupMemberTopic = "GKM";
+    String QuitGroupTopic = "GQ";
+    String DismissGroupTopic = "GD";
+    String ModifyGroupInfoTopic = "GMI";
     String ModifyGroupAliasTopic = "GMA";
     String GetGroupInfoTopic = "GPGI";
     String GetGroupMemberTopic = "GPGM";
@@ -36,7 +36,7 @@ public interface IMTopic {
     String GetUserInfoTopic = "UPUI";
     String ModifyMyInfoTopic = "MMI";
 
-	String GetQiniuUploadTokenTopic = "GQNUT";
+    String GetQiniuUploadTokenTopic = "GQNUT";
 
     String AddFriendRequestTopic = "FAR";
     String HandleFriendRequestTopic = "FHR";

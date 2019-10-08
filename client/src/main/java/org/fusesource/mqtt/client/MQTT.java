@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,7 @@ package org.fusesource.mqtt.client;
 
 import org.fusesource.hawtbuf.UTF8Buffer;
 import org.fusesource.hawtdispatch.DispatchQueue;
-import org.fusesource.hawtdispatch.transport.*;
+import org.fusesource.hawtdispatch.transport.TcpTransport;
 import org.fusesource.mqtt.codec.CONNECT;
 
 import javax.net.ssl.SSLContext;
@@ -28,10 +28,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static org.fusesource.hawtbuf.Buffer.utf8;
-import static org.fusesource.hawtdispatch.Dispatch.createQueue;
 
 
 /**
@@ -43,39 +46,42 @@ import static org.fusesource.hawtdispatch.Dispatch.createQueue;
 public class MQTT {
 
     private static final long KEEP_ALIVE = Long.parseLong(System.getProperty("mqtt.thread.keep_alive", Integer.toString(1000)));
-    private static final long STACK_SIZE = Long.parseLong(System.getProperty("mqtt.thread.stack_size", Integer.toString(1024*512)));
+    private static final long STACK_SIZE = Long.parseLong(System.getProperty("mqtt.thread.stack_size", Integer.toString(1024 * 512)));
     private static ThreadPoolExecutor blockingThreadPool;
 
 
     public synchronized static ThreadPoolExecutor getBlockingThreadPool() {
-        if( blockingThreadPool == null ) {
+        if (blockingThreadPool == null) {
             blockingThreadPool = new ThreadPoolExecutor(0, Integer.MAX_VALUE, KEEP_ALIVE, TimeUnit.MILLISECONDS, new SynchronousQueue<Runnable>(), new ThreadFactory() {
-                    public Thread newThread(Runnable r) {
-                        Thread rc = new Thread(null, r, "MQTT Task", STACK_SIZE);
-                        rc.setDaemon(true);
-                        return rc;
-                    }
-                }) {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread rc = new Thread(null, r, "MQTT Task", STACK_SIZE);
+                    rc.setDaemon(true);
+                    return rc;
+                }
+            }) {
 
-                    @Override
-                    public void shutdown() {
-                        // we don't ever shutdown since we are shared..
-                    }
+                @Override
+                public void shutdown() {
+                    // we don't ever shutdown since we are shared..
+                }
 
-                    @Override
-                    public List<Runnable> shutdownNow() {
-                        // we don't ever shutdown since we are shared..
-                        return Collections.emptyList();
-                    }
-                };
+                @Override
+                public List<Runnable> shutdownNow() {
+                    // we don't ever shutdown since we are shared..
+                    return Collections.emptyList();
+                }
+            };
         }
         return blockingThreadPool;
     }
+
     public synchronized static void setBlockingThreadPool(ThreadPoolExecutor pool) {
         blockingThreadPool = pool;
     }
-    
+
     private static final URI DEFAULT_HOST = createDefaultHost();
+
     private static URI createDefaultHost() {
         try {
             return new URI("tcp://127.0.0.1:1883");
@@ -92,13 +98,13 @@ public class MQTT {
     protected int maxReadRate;
     protected int maxWriteRate;
     protected int trafficClass = TcpTransport.IPTOS_THROUGHPUT;
-    protected int receiveBufferSize = 1024*64;
-    protected int sendBufferSize = 1024*64;
+    protected int receiveBufferSize = 1024 * 64;
+    protected int sendBufferSize = 1024 * 64;
     protected boolean useLocalHost = true;
     protected CONNECT connect = new CONNECT();
 
     protected long reconnectDelay = 10;
-    protected long reconnectDelayMax = 30*1000;
+    protected long reconnectDelayMax = 30 * 1000;
     protected double reconnectBackOffMultiplier = 2.0f;
     protected long reconnectAttemptsMax = -1;
     protected long connectAttemptsMax = -1;
@@ -106,6 +112,7 @@ public class MQTT {
 
     public MQTT() {
     }
+
     public MQTT(MQTT other) {
         this.host = other.host;
         this.localAddress = other.localAddress;
@@ -128,14 +135,16 @@ public class MQTT {
     }
 
     public CallbackConnection callbackConnection() {
-        if( !isCleanSession() && ( getClientId()==null || getClientId().length==0 )) {
+        if (!isCleanSession() && (getClientId() == null || getClientId().length == 0)) {
             throw new IllegalArgumentException("The client id MUST be configured when clean session is set to false");
         }
         return new CallbackConnection(new MQTT(this));
     }
+
     public FutureConnection futureConnection() {
         return new FutureConnection(callbackConnection());
     }
+
     public BlockingConnection blockingConnection() {
         return new BlockingConnection(futureConnection());
     }
@@ -187,6 +196,7 @@ public class MQTT {
     public void setClientId(String clientId) {
         this.setClientId(utf8(clientId));
     }
+
     public void setClientId(UTF8Buffer clientId) {
         connect.clientId(clientId);
     }
@@ -198,6 +208,7 @@ public class MQTT {
     public void setPassword(String password) {
         this.setPassword(utf8(password));
     }
+
     public void setPassword(UTF8Buffer password) {
         connect.password(password);
     }
@@ -205,6 +216,7 @@ public class MQTT {
     public void setUserName(String userName) {
         this.setUserName(utf8(userName));
     }
+
     public void setUserName(UTF8Buffer userName) {
         connect.userName(userName);
     }
@@ -212,6 +224,7 @@ public class MQTT {
     public void setWillMessage(String willMessage) {
         connect.willMessage(utf8(willMessage));
     }
+
     public void setWillMessage(UTF8Buffer willMessage) {
         connect.willMessage(willMessage);
     }
@@ -221,17 +234,21 @@ public class MQTT {
     }
 
     public void setVersion(String version) {
-        if( "3.1".equals(version) ) {
+        if ("3.1".equals(version)) {
             connect.version(3);
-        } else if( "3.1.1".equals(version) ) {
+        } else if ("3.1.1".equals(version)) {
             connect.version(4);
         }
     }
+
     public String getVersion() {
-        switch(connect.version()) {
-            case 3: return "3.1";
-            case 4: return "3.1.1";
-            default: return "unknown";
+        switch (connect.version()) {
+            case 3:
+                return "3.1";
+            case 4:
+                return "3.1.1";
+            default:
+                return "unknown";
         }
     }
 
@@ -242,6 +259,7 @@ public class MQTT {
     public void setWillTopic(String willTopic) {
         this.setWillTopic(utf8(willTopic));
     }
+
     public void setWillTopic(UTF8Buffer willTopic) {
         connect.willTopic(willTopic);
     }
@@ -269,6 +287,7 @@ public class MQTT {
     public void setLocalAddress(String localAddress) throws URISyntaxException {
         this.setLocalAddress(new URI(localAddress));
     }
+
     public void setLocalAddress(URI localAddress) {
         this.localAddress = localAddress;
     }
@@ -300,12 +319,15 @@ public class MQTT {
     public URI getHost() {
         return host;
     }
+
     public void setHost(String host, int port) throws URISyntaxException {
-        this.setHost(new URI("tcp://"+host+":"+port));
+        this.setHost(new URI("tcp://" + host + ":" + port));
     }
+
     public void setHost(String host) throws URISyntaxException {
         this.setHost(new URI(host));
     }
+
     public void setHost(URI host) {
         this.host = host;
     }

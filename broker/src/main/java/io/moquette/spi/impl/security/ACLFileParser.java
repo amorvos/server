@@ -18,7 +18,13 @@ package io.moquette.spi.impl.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.text.ParseException;
 
 /**
@@ -32,11 +38,9 @@ public final class ACLFileParser {
     /**
      * Parse the configuration from file.
      *
-     * @param file
-     *            to parse
+     * @param file to parse
      * @return the collector of authorizations form reader passed into.
-     * @throws ParseException
-     *             if the format is not compliant.
+     * @throws ParseException if the format is not compliant.
      */
     public static AuthorizationsCollector parse(File file) throws ParseException {
         if (file == null) {
@@ -45,9 +49,9 @@ public final class ACLFileParser {
         }
         if (!file.exists()) {
             LOG.warn(
-                    String.format(
-                            "parsing not existing file %s, so fallback on default configuration!",
-                            file.getAbsolutePath()));
+                String.format(
+                    "parsing not existing file %s, so fallback on default configuration!",
+                    file.getAbsolutePath()));
             return AuthorizationsCollector.emptyImmutableCollector();
         }
         try {
@@ -55,10 +59,10 @@ public final class ACLFileParser {
             return parse(reader);
         } catch (FileNotFoundException fex) {
             LOG.warn(
-                    String.format(
-                            "parsing not existing file %s, so fallback on default configuration!",
-                            file.getAbsolutePath()),
-                    fex);
+                String.format(
+                    "parsing not existing file %s, so fallback on default configuration!",
+                    file.getAbsolutePath()),
+                fex);
             return AuthorizationsCollector.emptyImmutableCollector();
         }
     }
@@ -66,11 +70,9 @@ public final class ACLFileParser {
     /**
      * Parse the ACL configuration file
      *
-     * @param reader
-     *            to parse
+     * @param reader to parse
      * @return the collector of authorizations form reader passed into.
-     * @throws ParseException
-     *             if the format is not compliant.
+     * @throws ParseException if the format is not compliant.
      */
     public static AuthorizationsCollector parse(Reader reader) throws ParseException {
         if (reader == null) {

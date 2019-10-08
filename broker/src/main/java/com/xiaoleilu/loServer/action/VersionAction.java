@@ -13,8 +13,6 @@ import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import cn.wildfirechat.pojos.InputUserLogin;
-import cn.wildfirechat.pojos.OutputLoginData;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import win.liyufan.im.GitRepositoryState;

@@ -12,8 +12,6 @@ package cn.wildfirechat.pojos;
 import cn.wildfirechat.proto.WFCMessage;
 import io.netty.util.internal.StringUtil;
 
-import java.util.List;
-
 public class InputCreateGroup extends InputGroupBase {
     private PojoGroup group;
 
@@ -39,7 +37,7 @@ public class InputCreateGroup extends InputGroupBase {
             groupInfoBuilder.setOwner(group.getGroup_info().getOwner());
         }
 
-            groupInfoBuilder.setType(group.getGroup_info().getType());
+        groupInfoBuilder.setType(group.getGroup_info().getType());
 
         if (!StringUtil.isNullOrEmpty(group.getGroup_info().extra)) {
             groupInfoBuilder.setExtra(group.getGroup_info().getExtra());

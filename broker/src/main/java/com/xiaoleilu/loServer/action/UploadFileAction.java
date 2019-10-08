@@ -12,13 +12,22 @@ import com.hazelcast.util.StringUtil;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.RequireAuthentication;
 import com.xiaoleilu.loServer.annotation.Route;
-import com.xiaoleilu.loServer.handler.*;
+import com.xiaoleilu.loServer.handler.Request;
+import com.xiaoleilu.loServer.handler.Response;
 import io.moquette.server.config.MediaServerConfig;
-import io.moquette.spi.impl.security.AES;
 import io.moquette.spi.security.DES;
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.multipart.*;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpContent;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.LastHttpContent;
+import io.netty.handler.codec.http.multipart.Attribute;
+import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
+import io.netty.handler.codec.http.multipart.FileUpload;
+import io.netty.handler.codec.http.multipart.HttpDataFactory;
+import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
+import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,10 +66,10 @@ public class UploadFileAction extends Action {
         try {
             String signKey = DES.decryptDES(token);
             String[] parts = signKey.split("\\|");
-            if(parts.length == 3) {
-                if(parts[0].equals(KEY)) {
+            if (parts.length == 3) {
+                if (parts[0].equals(KEY)) {
                     long timestamp = Long.parseLong(parts[1]);
-                    if(Math.abs(System.currentTimeMillis() - timestamp) < 2 * 60 * 60 * 1000) {
+                    if (Math.abs(System.currentTimeMillis() - timestamp) < 2 * 60 * 60 * 1000) {
                         return Integer.parseInt(parts[2]);
                     }
                 }
@@ -154,7 +163,7 @@ public class UploadFileAction extends Action {
                 InterfaceHttpData data = decoder.next();
                 if (data != null) {
                     try {
-                        if(!writeFileUploadData(data, response, requestId, isKeepAlive, bucket)) {
+                        if (!writeFileUploadData(data, response, requestId, isKeepAlive, bucket)) {
                             break;
                         }
                     } finally {
@@ -178,7 +187,7 @@ public class UploadFileAction extends Action {
                 String remoteFileName = fileUpload.getFilename();
                 long remoteFileSize = fileUpload.length();
 
-                if(bucket[0] == -1) {
+                if (bucket[0] == -1) {
                     logger.warn("Not authenticated!");
 
                     response.setStatus(HttpResponseStatus.BAD_REQUEST);
@@ -209,7 +218,6 @@ public class UploadFileAction extends Action {
                 }
 
 
-
                 String remoteFileExt = "";
                 if (remoteFileName.lastIndexOf(".") == -1) {
                     remoteFileExt = "octetstream";
@@ -233,8 +241,8 @@ public class UploadFileAction extends Action {
                 int savedThunkSize = 0; // 分片接收保存的大小
                 int offset = 0; // 断点续传开始位置
 
-                Date nowTime=new Date();
-                SimpleDateFormat time=new SimpleDateFormat("yyyy/MM/dd/HH");
+                Date nowTime = new Date();
+                SimpleDateFormat time = new SimpleDateFormat("yyyy/MM/dd/HH");
                 String datePath = time.format(nowTime);
 
                 datePath = "fs/" + bucket[0] + "/" + datePath; //add bucket
@@ -242,9 +250,9 @@ public class UploadFileAction extends Action {
                 String dir = "./" + MediaServerConfig.FILE_STROAGE_ROOT + "/" + datePath;
 
                 File dirFile = new File(dir);
-                boolean bFile  = dirFile.exists();
+                boolean bFile = dirFile.exists();
 
-                if(!bFile) {
+                if (!bFile) {
                     bFile = dirFile.mkdirs();
                     if (!bFile) {
                         response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
@@ -279,17 +287,19 @@ public class UploadFileAction extends Action {
                             fileUpload.release();
 
                             response.setStatus(HttpResponseStatus.OK);
-                            String relativePath = datePath + "/" +  requestId;
+                            String relativePath = datePath + "/" + requestId;
                             response.setContent("{\"key\":\"" + relativePath + "\"}");
                             break;
                         }
                     } catch (Exception e) {
                         logger.error("save thunckData error!", e);
-                        if (fileUpload != null)
+                        if (fileUpload != null) {
                             fileUpload.release();
+                        }
 
-                        if (byteBuf != null)
+                        if (byteBuf != null) {
                             byteBuf.release();
+                        }
 
                         response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
                         response.setContent("服务器错误：" + e.getMessage());
@@ -303,9 +313,9 @@ public class UploadFileAction extends Action {
                         }
                     }
                 }
-            } else if(data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
-                Attribute attribute = (Attribute)data;
-                if(attribute.getName().equals("token")) {
+            } else if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
+                Attribute attribute = (Attribute) data;
+                if (attribute.getName().equals("token")) {
                     String token = attribute.getValue();
 
                     try {
@@ -335,8 +345,9 @@ public class UploadFileAction extends Action {
             raf.write(data);
         } finally {
             try {
-                if (raf != null)
+                if (raf != null) {
                     raf.close();
+                }
             } catch (Exception e) {
                 logger.warn("release error!", e);
             }

@@ -8,18 +8,18 @@
 
 package io.moquette.imhandler;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.WFCMessage;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 @Handler(IMTopic.PutUserSettingTopic)
 public class PutUserSettingHandler extends IMHandler<WFCMessage.ModifyUserSettingReq> {
     @Override
     public ErrorCode action(ByteBuf ackPayload, String clientID, String fromUser, boolean isAdmin, WFCMessage.ModifyUserSettingReq request, Qos1PublishHandler.IMCallback callback) {
-            long timestamp = m_messagesStore.updateUserSettings(fromUser, request);
-            publisher.publishNotification(IMTopic.NotifyUserSettingTopic, fromUser, timestamp);
-            return ErrorCode.ERROR_CODE_SUCCESS;
+        long timestamp = m_messagesStore.updateUserSettings(fromUser, request);
+        publisher.publishNotification(IMTopic.NotifyUserSettingTopic, fromUser, timestamp);
+        return ErrorCode.ERROR_CODE_SUCCESS;
     }
 }

@@ -12,7 +12,6 @@ import cn.wildfirechat.common.APIPath;
 import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.InputGetGroup;
 import cn.wildfirechat.pojos.OutputGroupMemberList;
-import cn.wildfirechat.pojos.PojoGroupInfo;
 import cn.wildfirechat.pojos.PojoGroupMember;
 import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
@@ -30,7 +29,7 @@ import java.util.List;
 
 @Route(APIPath.Group_Member_List)
 @HttpMethod("POST")
-public class GetGroupMembersAction extends AdminAction {
+public class GetGroupMembersAction extends AbstractAdminAction {
 
     @Override
     public boolean isTransactionAction() {

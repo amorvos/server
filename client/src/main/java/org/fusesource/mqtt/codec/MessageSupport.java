@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,14 +18,14 @@
 
 package org.fusesource.mqtt.codec;
 
-import java.io.IOException;
-import java.net.ProtocolException;
-
-import org.fusesource.mqtt.client.QoS;
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.hawtbuf.DataByteArrayInputStream;
 import org.fusesource.hawtbuf.DataByteArrayOutputStream;
 import org.fusesource.hawtbuf.UTF8Buffer;
+import org.fusesource.mqtt.client.QoS;
+
+import java.io.IOException;
+import java.net.ProtocolException;
 
 /**
  * <p>
@@ -44,7 +44,9 @@ public final class MessageSupport {
      */
     static public interface Message {
         public byte messageType();
+
         public Message decode(MQTTFrame frame) throws ProtocolException;
+
         public MQTTFrame encode();
     }
 
@@ -54,9 +56,13 @@ public final class MessageSupport {
      */
     static public interface Acked extends Message {
         public boolean dup();
+
         public Acked dup(boolean dup);
+
         public QoS qos();
+
         public short messageId();
+
         public Acked messageId(short messageId);
     }
 
@@ -82,7 +88,7 @@ public final class MessageSupport {
         abstract byte messageType();
 
         protected AckBase decode(MQTTFrame frame) throws ProtocolException {
-            assert(frame.buffers.length == 1);
+            assert (frame.buffers.length == 1);
             DataByteArrayInputStream is = new DataByteArrayInputStream(frame.buffers[0]);
             messageId = is.readShort();
             payload = new byte[is.available()];
@@ -118,85 +124,91 @@ public final class MessageSupport {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName()+"{" +
+            return getClass().getSimpleName() + "{" +
                 "messageId=" + messageId +
                 '}';
         }
     }
 
     static abstract public class EmptyBase {
-        abstract  byte messageType();
+        abstract byte messageType();
 
         protected EmptyBase decode(MQTTFrame frame) throws ProtocolException {
             return this;
         }
+
         public MQTTFrame encode() {
             return new MQTTFrame().commandType(messageType());
         }
     }
 
 
-   /**
-    * <p>
-    * </p>
-    *
-    * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
-    */
-   static public class HeaderBase {
+    /**
+     * <p>
+     * </p>
+     *
+     * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
+     */
+    static public class HeaderBase {
 
-       protected byte header;
+        protected byte header;
 
-       protected byte header() {
-           return header;
-       }
-       protected HeaderBase header(byte header) {
-           this.header = header;
-           return this;
-       }
+        protected byte header() {
+            return header;
+        }
 
-       protected byte messageType() {
-           return (byte) ((header & 0xF0) >>> 4);
-       }
-       protected HeaderBase commandType(int type) {
-           this.header &= 0x0F;
-           this.header |= (type << 4) & 0xF0;
-           return this;
-       }
+        protected HeaderBase header(byte header) {
+            this.header = header;
+            return this;
+        }
 
-       protected QoS qos() {
-           return QoS.values()[((header & 0x06) >>> 1)];
-       }
-       protected HeaderBase qos(QoS qos) {
-           this.header &= 0xF9;
-           this.header |= (qos.ordinal() << 1) & 0x06;
-           return this;
-       }
+        protected byte messageType() {
+            return (byte) ((header & 0xF0) >>> 4);
+        }
 
-       protected boolean dup() {
-           return (header & 0x08) > 0;
-       }
-       protected HeaderBase dup(boolean dup) {
-           if(dup) {
-               this.header |= 0x08;
-           } else {
-               this.header &= 0xF7;
-           }
-           return this;
-       }
+        protected HeaderBase commandType(int type) {
+            this.header &= 0x0F;
+            this.header |= (type << 4) & 0xF0;
+            return this;
+        }
 
-       protected boolean retain() {
-           return (header & 0x01) > 0;
-       }
-       protected HeaderBase retain(boolean retain) {
-           if(retain) {
-               this.header |= 0x01;
-           } else {
-               this.header &= 0xFE;
-           }
-           return this;
-       }
+        protected QoS qos() {
+            return QoS.values()[((header & 0x06) >>> 1)];
+        }
 
-   }
+        protected HeaderBase qos(QoS qos) {
+            this.header &= 0xF9;
+            this.header |= (qos.ordinal() << 1) & 0x06;
+            return this;
+        }
+
+        protected boolean dup() {
+            return (header & 0x08) > 0;
+        }
+
+        protected HeaderBase dup(boolean dup) {
+            if (dup) {
+                this.header |= 0x08;
+            } else {
+                this.header &= 0xF7;
+            }
+            return this;
+        }
+
+        protected boolean retain() {
+            return (header & 0x01) > 0;
+        }
+
+        protected HeaderBase retain(boolean retain) {
+            if (retain) {
+                this.header |= 0x01;
+            } else {
+                this.header &= 0xFE;
+            }
+            return this;
+        }
+
+    }
 
 
 }

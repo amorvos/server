@@ -1,13 +1,12 @@
 package io.moquette.spi.impl;
 
-import java.io.IOException;
-import java.security.SecureRandom;
-import java.util.Base64;
-
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
+import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.Base64;
 
 public class DesUtil {
     private final static String Key = "abcdefgh";
@@ -25,6 +24,7 @@ public class DesUtil {
 
     /**
      * Description 根据键值进行加密
+     *
      * @param data
      * @return
      * @throws Exception
@@ -37,6 +37,7 @@ public class DesUtil {
 
     /**
      * Description 根据键值进行解密
+     *
      * @param data
      * @return
      * @throws IOException
@@ -44,16 +45,18 @@ public class DesUtil {
      */
     public static String decrypt(String data) throws IOException,
         Exception {
-        if (data == null)
+        if (data == null) {
             return null;
+        }
 
         byte[] buf = Base64.getDecoder().decode(data);
-        byte[] bt = decrypt(buf,Key.getBytes());
+        byte[] bt = decrypt(buf, Key.getBytes());
         return new String(bt);
     }
 
     /**
      * Description 根据键值进行加密
+     *
      * @param data
      * @param key  加密键byte数组
      * @return
@@ -82,6 +85,7 @@ public class DesUtil {
 
     /**
      * Description 根据键值进行解密
+     *
      * @param data
      * @param key  加密键byte数组
      * @return

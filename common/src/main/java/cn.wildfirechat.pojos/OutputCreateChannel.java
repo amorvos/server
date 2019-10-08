@@ -9,8 +9,6 @@
 package cn.wildfirechat.pojos;
 
 
-import cn.wildfirechat.proto.WFCMessage;
-
 public class OutputCreateChannel {
     private String targetId;
 

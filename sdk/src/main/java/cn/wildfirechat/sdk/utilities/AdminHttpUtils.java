@@ -30,7 +30,7 @@ public class AdminHttpUtils {
         adminSecret = secret;
     }
 
-    public static <T> IMResult<T> httpJsonPost(String path, Object object, Class<T> clazz) throws Exception{
+    public static <T> IMResult<T> httpJsonPost(String path, Object object, Class<T> clazz) throws Exception {
         if (isNullOrEmpty(adminUrl) || isNullOrEmpty(path)) {
             LOG.error("Not init IM SDK correctly. Do you forget init it?");
             throw new Exception("SDK url or secret lack!");
@@ -41,7 +41,7 @@ public class AdminHttpUtils {
         try {
             HttpClient httpClient = HttpClientBuilder.create().build();
 
-            int nonce = (int)(Math.random() * 100000 + 3);
+            int nonce = (int) (Math.random() * 100000 + 3);
             long timestamp = System.currentTimeMillis();
             String str = nonce + "|" + adminSecret + "|" + timestamp;
             String sign = DigestUtils.sha1Hex(str);
@@ -67,12 +67,12 @@ public class AdminHttpUtils {
             HttpResponse response = httpClient.execute(post);
 
             int statusCode = response.getStatusLine().getStatusCode();
-            if(statusCode != HttpStatus.SC_OK){
-                LOG.info("Request error: "+statusCode);
+            if (statusCode != HttpStatus.SC_OK) {
+                LOG.info("Request error: " + statusCode);
                 throw new Exception("Http request error with code:" + statusCode);
-            }else{
+            } else {
                 BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity()
-                    .getContent(),"utf-8"));
+                    .getContent(), "utf-8"));
                 StringBuffer sb = new StringBuffer();
                 String line;
                 String NL = System.getProperty("line.separator");
@@ -90,8 +90,8 @@ public class AdminHttpUtils {
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
-        }finally{
-            if(post != null){
+        } finally {
+            if (post != null) {
                 post.releaseConnection();
             }
         }
@@ -99,9 +99,9 @@ public class AdminHttpUtils {
 
     private static <T> IMResult<T> fromJsonObject(String content, Class<T> clazz) {
         Type type = TypeBuilder
-                .newInstance(IMResult.class)
-                .addTypeParam(clazz)
-                .build();
+            .newInstance(IMResult.class)
+            .addTypeParam(clazz)
+            .build();
         return new Gson().fromJson(content, type);
     }
 

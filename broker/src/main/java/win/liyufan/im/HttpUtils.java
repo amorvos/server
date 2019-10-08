@@ -9,21 +9,17 @@
 package win.liyufan.im;
 
 import io.netty.util.internal.StringUtil;
-import okhttp3.*;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.params.CoreConnectionPNames;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 
 
 public class HttpUtils {
@@ -31,7 +27,7 @@ public class HttpUtils {
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     static private OkHttpClient client = new OkHttpClient();
 
-    public static void httpJsonPost(final String url, final String jsonStr){
+    public static void httpJsonPost(final String url, final String jsonStr) {
         LOG.info("POST to {} with data {}", url, jsonStr);
         if (StringUtil.isNullOrEmpty(url)) {
             LOG.error("http post failure with empty url");

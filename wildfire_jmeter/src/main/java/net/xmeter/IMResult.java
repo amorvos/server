@@ -44,7 +44,8 @@ public class IMResult<T> {
         IMRESULT_CODE_NOT_IMPLEMENT(254, "not implement"),
 
 
-        IMRESULT_CODE_ASYNC_HANDLER(255, "异步执行，服务器内部逻辑需要此代码，为正常情况，不能返回客户端"),;
+        IMRESULT_CODE_ASYNC_HANDLER(255, "异步执行，服务器内部逻辑需要此代码，为正常情况，不能返回客户端"),
+        ;
 
         public int code;
         public String msg;
@@ -56,12 +57,13 @@ public class IMResult<T> {
 
         public static IMResultCode fromCode(int code) {
             for (IMResultCode errorCode : IMResultCode.values()) {
-                if(errorCode.code == code) {
+                if (errorCode.code == code) {
                     return errorCode;
                 }
             }
             return IMRESULT_CODE_SERVER_ERROR;
         }
+
         public int getCode() {
             return code;
         }

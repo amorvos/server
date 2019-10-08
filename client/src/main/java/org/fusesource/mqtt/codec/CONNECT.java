@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,13 +18,13 @@
 
 package org.fusesource.mqtt.codec;
 
-import java.io.IOException;
-import java.net.ProtocolException;
-
-import org.fusesource.mqtt.client.QoS;
 import org.fusesource.hawtbuf.DataByteArrayInputStream;
 import org.fusesource.hawtbuf.DataByteArrayOutputStream;
 import org.fusesource.hawtbuf.UTF8Buffer;
+import org.fusesource.mqtt.client.QoS;
+
+import java.io.IOException;
+import java.net.ProtocolException;
 
 /**
  * <p>
@@ -35,7 +35,7 @@ import org.fusesource.hawtbuf.UTF8Buffer;
 public class CONNECT implements MessageSupport.Message {
 
     public static final byte TYPE = 1;
-    
+
     private static final UTF8Buffer V3_PROTOCOL_NAME = new UTF8Buffer("MQIsdp");
     private static final UTF8Buffer V4_PROTOCOL_NAME = new UTF8Buffer("MQTT");
 
@@ -51,7 +51,7 @@ public class CONNECT implements MessageSupport.Message {
     private int version = 3;
 
 
-    public CONNECT(){
+    public CONNECT() {
     }
 
     public CONNECT(CONNECT other) {
@@ -67,23 +67,25 @@ public class CONNECT implements MessageSupport.Message {
         this.version = other.version;
     }
 
+    @Override
     public byte messageType() {
         return TYPE;
     }
 
+    @Override
     public CONNECT decode(MQTTFrame frame) throws ProtocolException {
-        assert(frame.buffers.length == 1);
+        assert (frame.buffers.length == 1);
         DataByteArrayInputStream is = new DataByteArrayInputStream(frame.buffers[0]);
 
         UTF8Buffer protocolName = MessageSupport.readUTF(is);
         if (V4_PROTOCOL_NAME.equals(protocolName)) {
             version = is.readByte() & 0xFF;
-            if( version < 4 ) {
+            if (version < 4) {
                 throw new ProtocolException("Invalid CONNECT frame: protocol name/version mismatch");
             }
-        } else if( V3_PROTOCOL_NAME.equals(protocolName) ) {
+        } else if (V3_PROTOCOL_NAME.equals(protocolName)) {
             version = is.readByte() & 0xFF;
-            if( version != 3 ) {
+            if (version != 3) {
                 throw new ProtocolException("Invalid CONNECT frame: protocol name/version mismatch");
             }
         } else {
@@ -100,66 +102,67 @@ public class CONNECT implements MessageSupport.Message {
 
         keepAlive = is.readShort();
         clientId = MessageSupport.readUTF(is);
-        if( clientId.length == 0 ) {
+        if (clientId.length == 0) {
             clientId = null;
         }
-        if(will_flag) {
+        if (will_flag) {
             willTopic = MessageSupport.readUTF(is);
             willMessage = MessageSupport.readUTF(is);
         }
-        if( username_flag ) {
+        if (username_flag) {
             userName = MessageSupport.readUTF(is);
         }
-        if( password_flag ) {
+        if (password_flag) {
             password = MessageSupport.readUTF(is);
         }
         return this;
     }
-    
+
+    @Override
     public MQTTFrame encode() {
         try {
-            if( (clientId==null || clientId.length == 0) && !cleanSession ) {
+            if ((clientId == null || clientId.length == 0) && !cleanSession) {
                 throw new IllegalArgumentException("A clean session must be used when no clientId is specified");
             }
             DataByteArrayOutputStream os = new DataByteArrayOutputStream(500);
-            if(version==3) {
+            if (version == 3) {
                 MessageSupport.writeUTF(os, V3_PROTOCOL_NAME);
                 os.writeByte(version);
-            } else if(version >= 4) {
+            } else if (version >= 4) {
                 MessageSupport.writeUTF(os, V4_PROTOCOL_NAME);
                 os.writeByte(version);
             } else {
-                throw new IllegalArgumentException("Invalid version: "+version);
+                throw new IllegalArgumentException("Invalid version: " + version);
             }
 
             int flags = 0;
-            if(userName!=null) {
+            if (userName != null) {
                 flags |= 0x80;
             }
-            if(password!=null) {
+            if (password != null) {
                 flags |= 0x40;
             }
-            if(willTopic!=null && willMessage!=null) {
+            if (willTopic != null && willMessage != null) {
                 flags |= 0x04;
-                if(willRetain) {
+                if (willRetain) {
                     flags |= 0x20;
                 }
                 flags |= (willQos << 3) & 0x18;
             }
-            if(cleanSession) {
+            if (cleanSession) {
                 flags |= 0x02;
             }
             os.writeByte(flags);
             os.writeShort(keepAlive);
             MessageSupport.writeUTF(os, clientId);
-            if(willTopic!=null && willMessage!=null) {
+            if (willTopic != null && willMessage != null) {
                 MessageSupport.writeUTF(os, willTopic);
                 MessageSupport.writeUTF(os, willMessage);
             }
-            if(userName!=null) {
+            if (userName != null) {
                 MessageSupport.writeUTF(os, userName);
             }
-            if(password!=null) {
+            if (password != null) {
                 MessageSupport.writeUTF(os, password);
             }
 
@@ -257,12 +260,12 @@ public class CONNECT implements MessageSupport.Message {
     }
 
     public CONNECT version(int version) {
-        if(version==3) {
+        if (version == 3) {
             this.version = version;
-        } else if(version >= 4) {
+        } else if (version >= 4) {
             this.version = version;
         } else {
-            throw new IllegalArgumentException("Invalid version: "+version);
+            throw new IllegalArgumentException("Invalid version: " + version);
         }
         return this;
     }
@@ -270,15 +273,15 @@ public class CONNECT implements MessageSupport.Message {
     @Override
     public String toString() {
         return "CONNECT{" +
-                "cleanSession=" + cleanSession +
-                ", keepAlive=" + keepAlive +
-                ", clientId=" + clientId +
-                ", willTopic=" + willTopic +
-                ", willMessage=" + willMessage +
-                ", willRetain=" + willRetain +
-                ", willQos=" + willQos +
-                ", userName=" + userName +
-                ", password=" + password +
-                '}';
+            "cleanSession=" + cleanSession +
+            ", keepAlive=" + keepAlive +
+            ", clientId=" + clientId +
+            ", willTopic=" + willTopic +
+            ", willMessage=" + willMessage +
+            ", willRetain=" + willRetain +
+            ", willQos=" + willQos +
+            ", userName=" + userName +
+            ", password=" + password +
+            '}';
     }
 }

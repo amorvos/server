@@ -16,8 +16,9 @@
 
 package io.moquette.spi.impl.security;
 
-import static io.moquette.spi.impl.security.Authorization.Permission.READWRITE;
 import io.moquette.spi.impl.subscriptions.Topic;
+
+import static io.moquette.spi.impl.security.Authorization.Permission.READWRITE;
 
 /**
  * Carries the read/write authorization to topics for the users.
@@ -49,17 +50,21 @@ public class Authorization {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
         Authorization that = (Authorization) o;
 
-        if (permission != that.permission)
+        if (permission != that.permission) {
             return false;
-        if (!topic.equals(that.topic))
+        }
+        if (!topic.equals(that.topic)) {
             return false;
+        }
 
         return true;
     }

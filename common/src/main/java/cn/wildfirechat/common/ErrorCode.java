@@ -57,7 +57,8 @@ public enum ErrorCode {
     ERROR_CODE_NOT_IMPLEMENT(254, "not implement"),
 
 
-    ERROR_CODE_SUCCESS_GZIPED(255, "success withe gzip response"),;
+    ERROR_CODE_SUCCESS_GZIPED(255, "success withe gzip response"),
+    ;
 
     public int code;
     public String msg;
@@ -69,12 +70,13 @@ public enum ErrorCode {
 
     public static ErrorCode fromCode(int code) {
         for (ErrorCode errorCode : ErrorCode.values()) {
-            if(errorCode.code == (code&0xff)) {
+            if (errorCode.code == (code & 0xff)) {
                 return errorCode;
             }
         }
         return ERROR_CODE_SERVER_ERROR;
     }
+
     public int getCode() {
         return code;
     }

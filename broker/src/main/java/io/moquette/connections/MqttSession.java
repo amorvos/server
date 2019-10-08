@@ -16,8 +16,6 @@
 
 package io.moquette.connections;
 
-import java.util.Collection;
-
 /**
  * A class that represents the overall connection status of a MQTT session. Its instances will be
  * used by an external codebase when the broker is configured in embedded mode.

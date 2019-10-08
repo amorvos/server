@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,14 +50,24 @@ public class Topic {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null) return false;
-        if (o.getClass() != this.getClass()) return false;
-        if (this == o) return true;
+        if (o == null) {
+            return false;
+        }
+        if (o.getClass() != this.getClass()) {
+            return false;
+        }
+        if (this == o) {
+            return true;
+        }
 
         Topic topic = (Topic) o;
 
-        if (name != null ? !name.equals(topic.name) : topic.name != null) return false;
-        if (qos != topic.qos) return false;
+        if (name != null ? !name.equals(topic.name) : topic.name != null) {
+            return false;
+        }
+        if (qos != topic.qos) {
+            return false;
+        }
 
         return true;
     }
@@ -72,7 +82,7 @@ public class Topic {
     @Override
     public String toString() {
         return "{ name=" + name +
-                ", qos=" + qos +
-                " }";
+            ", qos=" + qos +
+            " }";
     }
 }

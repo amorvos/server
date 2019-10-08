@@ -1,7 +1,16 @@
 package cn.wildfirechat.sdk;
 
 import cn.wildfirechat.common.APIPath;
-import cn.wildfirechat.pojos.*;
+import cn.wildfirechat.pojos.InputCreateRobot;
+import cn.wildfirechat.pojos.InputGetToken;
+import cn.wildfirechat.pojos.InputGetUserInfo;
+import cn.wildfirechat.pojos.InputOutputUserBlockStatus;
+import cn.wildfirechat.pojos.InputOutputUserInfo;
+import cn.wildfirechat.pojos.OutputCreateRobot;
+import cn.wildfirechat.pojos.OutputCreateUser;
+import cn.wildfirechat.pojos.OutputGetIMTokenData;
+import cn.wildfirechat.pojos.OutputUserBlockStatusList;
+import cn.wildfirechat.pojos.OutputUserStatus;
 import cn.wildfirechat.sdk.model.IMResult;
 import cn.wildfirechat.sdk.utilities.AdminHttpUtils;
 
@@ -63,8 +72,6 @@ public class UserAdmin {
 //        InputGetUserInfo inputGetUserInfo = new InputGetUserInfo(userId, null);
 //        return AdminHttpUtils.httpJsonPost(path, null, OutputUserBlockStatusList.class);
 //    }
-
-
 
 
 }

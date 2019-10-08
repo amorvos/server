@@ -1,7 +1,19 @@
 package cn.wildfirechat.sdk;
 
 import cn.wildfirechat.common.APIPath;
-import cn.wildfirechat.pojos.*;
+import cn.wildfirechat.pojos.InputAddGroupMember;
+import cn.wildfirechat.pojos.InputCreateGroup;
+import cn.wildfirechat.pojos.InputDismissGroup;
+import cn.wildfirechat.pojos.InputGetGroup;
+import cn.wildfirechat.pojos.InputKickoffGroupMember;
+import cn.wildfirechat.pojos.InputModifyGroupInfo;
+import cn.wildfirechat.pojos.InputTransferGroup;
+import cn.wildfirechat.pojos.MessagePayload;
+import cn.wildfirechat.pojos.OutputCreateGroupResult;
+import cn.wildfirechat.pojos.OutputGroupMemberList;
+import cn.wildfirechat.pojos.PojoGroup;
+import cn.wildfirechat.pojos.PojoGroupInfo;
+import cn.wildfirechat.pojos.PojoGroupMember;
 import cn.wildfirechat.sdk.model.IMResult;
 import cn.wildfirechat.sdk.utilities.AdminHttpUtils;
 
@@ -9,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroupAdmin {
-    public static IMResult<OutputCreateGroupResult> createGroup(String operator, PojoGroupInfo group_info, List<PojoGroupMember> members, List<Integer> to_lines, MessagePayload  notify_message) throws Exception {
+    public static IMResult<OutputCreateGroupResult> createGroup(String operator, PojoGroupInfo group_info, List<PojoGroupMember> members, List<Integer> to_lines, MessagePayload notify_message) throws Exception {
         String path = APIPath.Create_Group;
         PojoGroup pojoGroup = new PojoGroup();
         pojoGroup.setGroup_info(group_info);
@@ -31,7 +43,7 @@ public class GroupAdmin {
         return AdminHttpUtils.httpJsonPost(path, input, PojoGroupInfo.class);
     }
 
-    public static IMResult<Void> dismissGroup(String operator, String groupId, List<Integer> to_lines, MessagePayload  notify_message) throws Exception {
+    public static IMResult<Void> dismissGroup(String operator, String groupId, List<Integer> to_lines, MessagePayload notify_message) throws Exception {
         String path = APIPath.Group_Dismiss;
         InputDismissGroup dismissGroup = new InputDismissGroup();
         dismissGroup.setOperator(operator);
@@ -41,7 +53,7 @@ public class GroupAdmin {
         return AdminHttpUtils.httpJsonPost(path, dismissGroup, Void.class);
     }
 
-    public static IMResult<Void> transferGroup(String operator, String groupId, String newOwner, List<Integer> to_lines, MessagePayload  notify_message) throws Exception {
+    public static IMResult<Void> transferGroup(String operator, String groupId, String newOwner, List<Integer> to_lines, MessagePayload notify_message) throws Exception {
         String path = APIPath.Group_Transfer;
         InputTransferGroup transferGroup = new InputTransferGroup();
         transferGroup.setGroup_id(groupId);
@@ -71,7 +83,7 @@ public class GroupAdmin {
         return AdminHttpUtils.httpJsonPost(path, input, OutputGroupMemberList.class);
     }
 
-    public static IMResult<Void> addGroupMembers(String operator, String groupId, List<String> groupMemberIds, List<Integer> to_lines, MessagePayload  notify_message) throws Exception {
+    public static IMResult<Void> addGroupMembers(String operator, String groupId, List<String> groupMemberIds, List<Integer> to_lines, MessagePayload notify_message) throws Exception {
         String path = APIPath.Group_Member_Add;
         InputAddGroupMember addGroupMember = new InputAddGroupMember();
         addGroupMember.setGroup_id(groupId);
@@ -88,7 +100,7 @@ public class GroupAdmin {
         return AdminHttpUtils.httpJsonPost(path, addGroupMember, Void.class);
     }
 
-    public static IMResult<Void> kickoffGroupMembers(String operator, String groupId, List<String> groupMemberIds, List<Integer> to_lines, MessagePayload  notify_message) throws Exception {
+    public static IMResult<Void> kickoffGroupMembers(String operator, String groupId, List<String> groupMemberIds, List<Integer> to_lines, MessagePayload notify_message) throws Exception {
         String path = APIPath.Group_Member_Kickoff;
         InputKickoffGroupMember kickoffGroupMember = new InputKickoffGroupMember();
         kickoffGroupMember.setGroup_id(groupId);

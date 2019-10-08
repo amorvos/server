@@ -49,8 +49,7 @@ public interface IConnectionsManager {
      * Closes a physical connection.
      *
      * @param clientID
-     * @param closeImmediately
-     *            If false, the connection will be flushed before it is closed.
+     * @param closeImmediately If false, the connection will be flushed before it is closed.
      * @return
      */
     boolean closeConnection(String clientID, boolean closeImmediately);

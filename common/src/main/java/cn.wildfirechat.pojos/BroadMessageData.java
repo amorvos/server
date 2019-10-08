@@ -42,7 +42,7 @@ public class BroadMessageData {
     }
 
     public static boolean isValide(BroadMessageData sendMessageData) {
-        if(sendMessageData == null ||
+        if (sendMessageData == null ||
             StringUtil.isNullOrEmpty(sendMessageData.getSender()) ||
             sendMessageData.getPayload() == null) {
             return false;

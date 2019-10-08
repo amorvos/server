@@ -9,7 +9,9 @@
 package com.xiaoleilu.loServer.action.admin;
 
 import cn.wildfirechat.common.APIPath;
-import cn.wildfirechat.pojos.*;
+import cn.wildfirechat.common.ErrorCode;
+import cn.wildfirechat.pojos.InputGetChatroomInfo;
+import cn.wildfirechat.pojos.OutputGetChatroomInfo;
 import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
@@ -20,11 +22,10 @@ import com.xiaoleilu.loServer.handler.Response;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
-import cn.wildfirechat.common.ErrorCode;
 
 @Route(APIPath.Chatroom_Info)
 @HttpMethod("POST")
-public class GetChatroomInfoAction extends AdminAction {
+public class GetChatroomInfoAction extends AbstractAdminAction {
 
     @Override
     public boolean isTransactionAction() {

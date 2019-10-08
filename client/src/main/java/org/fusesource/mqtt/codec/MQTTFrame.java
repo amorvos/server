@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,15 +18,15 @@
 
 package org.fusesource.mqtt.codec;
 
-import org.fusesource.mqtt.client.QoS;
 import org.fusesource.hawtbuf.Buffer;
+import org.fusesource.mqtt.client.QoS;
 
 /**
-* <p>
-* </p>
-*
-* @author <a href="http://hiramchirino.com">Hiram Chirino</a>
-*/
+ * <p>
+ * </p>
+ *
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
+ */
 public class MQTTFrame extends MessageSupport.HeaderBase {
 
     private static final Buffer[] NO_BUFFERS = new Buffer[0];
@@ -35,17 +35,20 @@ public class MQTTFrame extends MessageSupport.HeaderBase {
 
     public MQTTFrame() {
     }
-    public MQTTFrame( Buffer buffer) {
+
+    public MQTTFrame(Buffer buffer) {
         this(new Buffer[]{buffer});
     }
-    public MQTTFrame( Buffer[] buffers) {
+
+    public MQTTFrame(Buffer[] buffers) {
         this.buffers = buffers;
     }
 
     public Buffer[] buffers() {
         return buffers;
     }
-    public MQTTFrame buffers(Buffer...buffers) {
+
+    public MQTTFrame buffers(Buffer... buffers) {
         this.buffers = buffers;
         return this;
     }
@@ -62,7 +65,7 @@ public class MQTTFrame extends MessageSupport.HeaderBase {
 
     @Override
     public MQTTFrame header(byte header) {
-        return (MQTTFrame)super.header(header);
+        return (MQTTFrame) super.header(header);
     }
 
     @Override
@@ -72,7 +75,7 @@ public class MQTTFrame extends MessageSupport.HeaderBase {
 
     @Override
     public MQTTFrame commandType(int type) {
-        return (MQTTFrame)super.commandType(type);
+        return (MQTTFrame) super.commandType(type);
     }
 
     @Override
@@ -108,7 +111,7 @@ public class MQTTFrame extends MessageSupport.HeaderBase {
     @Override
     public String toString() {
         String type = "unknown";
-        switch(messageType()) {
+        switch (messageType()) {
             case CONNECT.TYPE:
                 type = "CONNECT";
                 break;
@@ -154,6 +157,6 @@ public class MQTTFrame extends MessageSupport.HeaderBase {
             default:
         }
 
-        return "MQTTFrame { type: "+type+", qos: "+qos()+", dup:"+dup()+" }";
+        return "MQTTFrame { type: " + type + ", qos: " + qos() + ", dup:" + dup() + " }";
     }
 }

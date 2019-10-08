@@ -13,8 +13,6 @@ import cn.wildfirechat.common.APIPath;
 import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.BroadMessageData;
 import cn.wildfirechat.pojos.BroadMessageResult;
-import cn.wildfirechat.pojos.SendMessageData;
-import cn.wildfirechat.pojos.SendMessageResult;
 import com.google.gson.Gson;
 import com.hazelcast.util.StringUtil;
 import com.xiaoleilu.loServer.RestResult;
@@ -34,7 +32,7 @@ import java.util.concurrent.Executor;
 
 @Route(APIPath.Msg_Broadcast)
 @HttpMethod("POST")
-public class BroadcastMessageAction extends AdminAction {
+public class BroadcastMessageAction extends AbstractAdminAction {
 
     @Override
     public boolean isTransactionAction() {

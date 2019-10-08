@@ -30,11 +30,11 @@ public final class MqttConnectPayload {
     private final byte[] password;
 
     public MqttConnectPayload(
-            String clientIdentifier,
-            String willTopic,
-            String willMessage,
-            String userName,
-            byte[] password) {
+        String clientIdentifier,
+        String willTopic,
+        String willMessage,
+        String userName,
+        byte[] password) {
         this.clientIdentifier = clientIdentifier;
         this.willTopic = willTopic;
         this.willMessage = willMessage;

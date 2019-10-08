@@ -1,12 +1,6 @@
 package net.xmeter.gui;
 
-import java.awt.BorderLayout;
-
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
+import net.xmeter.Constants;
 import net.xmeter.samplers.SendMessageSampler;
 import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.gui.util.JSyntaxTextArea;
@@ -19,78 +13,82 @@ import org.apache.jorphan.gui.JLabeledTextField;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 
-import net.xmeter.Constants;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.BorderLayout;
 
 public class SendMessageSamplerUI extends AbstractSamplerGui implements Constants, ChangeListener {
-	private static final Logger logger = LoggingManager.getLoggerForClass();
-	private CommonConnUI connUI = new CommonConnUI();
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 2479085966683186422L;
+    private static final Logger logger = LoggingManager.getLoggerForClass();
+    private CommonConnUI connUI = new CommonConnUI();
+    /**
+     *
+     */
+    private static final long serialVersionUID = 2479085966683186422L;
 
-	private JLabeledChoice conversationTypeChoice = new JLabeledChoice("ConversationType:", new String[] { CONV_TYPE_SINGLE, CONV_TYPE_GROUP }, true, false);
-	private final JLabeledTextField target = new JLabeledTextField("Target:");
+    private JLabeledChoice conversationTypeChoice = new JLabeledChoice("ConversationType:", new String[]{CONV_TYPE_SINGLE, CONV_TYPE_GROUP}, true, false);
+    private final JLabeledTextField target = new JLabeledTextField("Target:");
 //	private JCheckBox timestamp = new JCheckBox("Add timestamp in payload");
 
-	private final JSyntaxTextArea sendMessage = JSyntaxTextArea.getInstance(10, 50);
-	private final JTextScrollPane messagePanel = JTextScrollPane.getInstance(sendMessage);
+    private final JSyntaxTextArea sendMessage = JSyntaxTextArea.getInstance(10, 50);
+    private final JTextScrollPane messagePanel = JTextScrollPane.getInstance(sendMessage);
 //	private JLabeledTextField stringLength = new JLabeledTextField("Length:");
 
-	public SendMessageSamplerUI() {
-		init();
-	}
+    public SendMessageSamplerUI() {
+        init();
+    }
 
-	private void init() {
-		logger.info("Initializing the UI.");
-		setLayout(new BorderLayout());
-		setBorder(makeBorder());
+    private void init() {
+        logger.info("Initializing the UI.");
+        setLayout(new BorderLayout());
+        setBorder(makeBorder());
 
-		add(makeTitlePanel(), BorderLayout.NORTH);
-		JPanel mainPanel = new VerticalPanel();
-		add(mainPanel, BorderLayout.CENTER);
+        add(makeTitlePanel(), BorderLayout.NORTH);
+        JPanel mainPanel = new VerticalPanel();
+        add(mainPanel, BorderLayout.CENTER);
 
-		mainPanel.add(connUI.createConnPanel());
-		mainPanel.add(connUI.createAuthentication());
-		mainPanel.add(connUI.createConnOptions());
+        mainPanel.add(connUI.createConnPanel());
+        mainPanel.add(connUI.createAuthentication());
+        mainPanel.add(connUI.createConnOptions());
 
-		mainPanel.add(createPubOption());
-		mainPanel.add(createPayload());
-	}
+        mainPanel.add(createPubOption());
+        mainPanel.add(createPayload());
+    }
 
-	private JPanel createPubOption() {
-		JPanel optsPanelCon = new VerticalPanel();
-		optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Send message options"));
+    private JPanel createPubOption() {
+        JPanel optsPanelCon = new VerticalPanel();
+        optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Send message options"));
 
-		conversationTypeChoice.addChangeListener(this);
+        conversationTypeChoice.addChangeListener(this);
 
-		JPanel optsPanel = new HorizontalPanel();
-		optsPanel.add(conversationTypeChoice);
-		optsPanel.add(target);
-		optsPanelCon.add(optsPanel);
+        JPanel optsPanel = new HorizontalPanel();
+        optsPanel.add(conversationTypeChoice);
+        optsPanel.add(target);
+        optsPanelCon.add(optsPanel);
 
-		return optsPanelCon;
-	}
+        return optsPanelCon;
+    }
 
-	private JPanel createPayload() {
-		JPanel optsPanelCon = new VerticalPanel();
-		optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Message Content"));
+    private JPanel createPayload() {
+        JPanel optsPanelCon = new VerticalPanel();
+        optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Message Content"));
 
-		JPanel horizon2 = new VerticalPanel();
-		messagePanel.setVisible(true);
-		horizon2.add(messagePanel);
+        JPanel horizon2 = new VerticalPanel();
+        messagePanel.setVisible(true);
+        horizon2.add(messagePanel);
 
-		optsPanelCon.add(horizon2);
-		return optsPanelCon;
-	}
+        optsPanelCon.add(horizon2);
+        return optsPanelCon;
+    }
 
-	@Override
-	public String getStaticLabel() {
-		return "Wildfire Send Message Sampler";
-	}
+    @Override
+    public String getStaticLabel() {
+        return "Wildfire Send Message Sampler";
+    }
 
-	@Override
-	public void stateChanged(ChangeEvent e) {
+    @Override
+    public void stateChanged(ChangeEvent e) {
 //		if(e.getSource() == this.messageTypes) {
 //			int selectedIndex = this.messageTypes.getSelectedIndex();
 //			if(selectedIndex == 0 || selectedIndex == 1) {
@@ -103,29 +101,29 @@ public class SendMessageSamplerUI extends AbstractSamplerGui implements Constant
 //				logger.info("Unknown message type.");
 //			}
 //		}
-	}
+    }
 
-	@Override
-	public String getLabelResource() {
-		return "";
-	}
+    @Override
+    public String getLabelResource() {
+        return "";
+    }
 
-	@Override
-	public TestElement createTestElement() {
+    @Override
+    public TestElement createTestElement() {
         logger.info("createTestElement called.");
-		SendMessageSampler sampler = new SendMessageSampler();
-		this.setupSamplerProperties(sampler);
+        SendMessageSampler sampler = new SendMessageSampler();
+        this.setupSamplerProperties(sampler);
         connUI.setupSamplerProperties(sampler);
         return sampler;
-	}
+    }
 
-	@Override
-	public void configure(TestElement element) {
+    @Override
+    public void configure(TestElement element) {
         logger.info("configure called.");
-		super.configure(element);
-		SendMessageSampler sampler = (SendMessageSampler) element;
-		
-		connUI.configure(sampler);
+        super.configure(element);
+        SendMessageSampler sampler = (SendMessageSampler) element;
+
+        connUI.configure(sampler);
 //		if(sampler.getQOS().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
         if ("1".equals(sampler.getConvType())) {
             this.conversationTypeChoice.setSelectedIndex(1);
@@ -135,8 +133,8 @@ public class SendMessageSamplerUI extends AbstractSamplerGui implements Constant
 //		} else {
 //			this.conversationTypeChoice.setText(sampler.getQOS());
 //		}
-		
-		this.target.setText(sampler.getTarget());
+
+        this.target.setText(sampler.getTarget());
 //		this.timestamp.setSelected(sampler.isAddTimestamp());
 //		if(MESSAGE_TYPE_STRING.equalsIgnoreCase(sampler.getMessageType())) {
 //			this.messageTypes.setSelectedIndex(0);
@@ -148,34 +146,34 @@ public class SendMessageSamplerUI extends AbstractSamplerGui implements Constant
 //		}
 //
 //		stringLength.setText(String.valueOf(sampler.getMessageLength()));
-		sendMessage.setText(sampler.getMessage());
-	}
+        sendMessage.setText(sampler.getMessage());
+    }
 
-	@Override
-	public void modifyTestElement(TestElement arg0) {
+    @Override
+    public void modifyTestElement(TestElement arg0) {
         logger.info("modifyTestElement called.");
-		SendMessageSampler sampler = (SendMessageSampler) arg0;
-		this.setupSamplerProperties(sampler);
-		connUI.setupSamplerProperties(sampler);
-	}
+        SendMessageSampler sampler = (SendMessageSampler) arg0;
+        this.setupSamplerProperties(sampler);
+        connUI.setupSamplerProperties(sampler);
+    }
 
-	private void setupSamplerProperties(SendMessageSampler sampler) {
-		this.configureTestElement(sampler);
-		connUI.setupSamplerProperties(sampler);
+    private void setupSamplerProperties(SendMessageSampler sampler) {
+        this.configureTestElement(sampler);
+        connUI.setupSamplerProperties(sampler);
 
-		sampler.setTarget(this.target.getText());
-	    sampler.setConvType(this.conversationTypeChoice.getSelectedIndex() + "");
-		sampler.setMessage(this.sendMessage.getText());
-	}
+        sampler.setTarget(this.target.getText());
+        sampler.setConvType(this.conversationTypeChoice.getSelectedIndex() + "");
+        sampler.setMessage(this.sendMessage.getText());
+    }
 
-	@Override
-	public void clearGui() {
+    @Override
+    public void clearGui() {
         logger.info("clearGui called.");
-		super.clearGui();
-		connUI.clearUI();
-		connUI.connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_PUB);
-		this.target.setText(DEFAULT_TARGET);
-		this.conversationTypeChoice.setSelectedIndex(0);
-		this.sendMessage.setText("");
-	}
+        super.clearGui();
+        connUI.clearUI();
+        connUI.connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_PUB);
+        this.target.setText(DEFAULT_TARGET);
+        this.conversationTypeChoice.setSelectedIndex(0);
+        this.sendMessage.setText("");
+    }
 }

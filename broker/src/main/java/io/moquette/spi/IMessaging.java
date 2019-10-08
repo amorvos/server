@@ -18,7 +18,7 @@ package io.moquette.spi;
 
 /**
  * Callback interface used to be notified of some events from the input event queue.
- *
+ * <p>
  * It's the abstraction of the messaging stuff attached in after the front protocol parsing stuff.
  */
 public interface IMessaging {

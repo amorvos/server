@@ -1,12 +1,30 @@
 package cn.wildfirechat.sdk;
 
 import cn.wildfirechat.common.ErrorCode;
-import cn.wildfirechat.pojos.*;
+import cn.wildfirechat.pojos.BroadMessageResult;
+import cn.wildfirechat.pojos.Conversation;
+import cn.wildfirechat.pojos.InputCreateChannel;
+import cn.wildfirechat.pojos.InputCreateRobot;
+import cn.wildfirechat.pojos.InputOutputUserBlockStatus;
+import cn.wildfirechat.pojos.InputOutputUserInfo;
+import cn.wildfirechat.pojos.MessagePayload;
+import cn.wildfirechat.pojos.MultiMessageResult;
+import cn.wildfirechat.pojos.OutputCreateChannel;
+import cn.wildfirechat.pojos.OutputCreateGroupResult;
+import cn.wildfirechat.pojos.OutputCreateRobot;
+import cn.wildfirechat.pojos.OutputCreateUser;
+import cn.wildfirechat.pojos.OutputGetIMTokenData;
+import cn.wildfirechat.pojos.OutputGroupMemberList;
+import cn.wildfirechat.pojos.OutputUserBlockStatusList;
+import cn.wildfirechat.pojos.OutputUserStatus;
+import cn.wildfirechat.pojos.PojoGroupInfo;
+import cn.wildfirechat.pojos.PojoGroupMember;
+import cn.wildfirechat.pojos.SendMessageResult;
+import cn.wildfirechat.pojos.SystemSettingPojo;
 import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.sdk.model.IMResult;
 import cn.wildfirechat.sdk.utilities.AdminHttpUtils;
 import cn.wildfirechat.sdk.utilities.RobotHttpUtils;
-
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,7 +124,7 @@ public class Main {
             System.exit(-1);
         }
 
-        IMResult<Void> resultVoid =UserAdmin.updateUserBlockStatus(userInfo.getUserId(), 2);
+        IMResult<Void> resultVoid = UserAdmin.updateUserBlockStatus(userInfo.getUserId(), 2);
         if (resultVoid != null && resultVoid.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
             System.out.println("block user done");
         } else {
@@ -146,7 +164,7 @@ public class Main {
             System.exit(-1);
         }
 
-        resultVoid =UserAdmin.updateUserBlockStatus(userInfo.getUserId(), 0);
+        resultVoid = UserAdmin.updateUserBlockStatus(userInfo.getUserId(), 0);
         if (resultVoid != null && resultVoid.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
             System.out.println("block user done");
         } else {
@@ -222,7 +240,7 @@ public class Main {
             System.exit(-1);
         }
 
-        voidIMResult = GroupAdmin.modifyGroupInfo(groupInfo.getOwner(), groupInfo.getTarget_id(), ProtoConstants.ModifyGroupInfoType.Modify_Group_Name,"HelloWorld", null);
+        voidIMResult = GroupAdmin.modifyGroupInfo(groupInfo.getOwner(), groupInfo.getTarget_id(), ProtoConstants.ModifyGroupInfoType.Modify_Group_Name, "HelloWorld", null);
         if (voidIMResult != null && voidIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
             System.out.println("transfer success");
         } else {
@@ -312,8 +330,8 @@ public class Main {
             System.out.println("multi message failure");
             System.exit(-1);
         }
-        
-        IMResult<SystemSettingPojo> resultGetSystemSetting  =  GeneralAdmin.getSystemSetting(Group_Max_Member_Count);
+
+        IMResult<SystemSettingPojo> resultGetSystemSetting = GeneralAdmin.getSystemSetting(Group_Max_Member_Count);
         if (resultGetSystemSetting != null && resultGetSystemSetting.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
             System.out.println("success");
         } else {
@@ -329,7 +347,7 @@ public class Main {
             System.exit(-1);
         }
 
-        resultGetSystemSetting  =  GeneralAdmin.getSystemSetting(Group_Max_Member_Count);
+        resultGetSystemSetting = GeneralAdmin.getSystemSetting(Group_Max_Member_Count);
         if (resultGetSystemSetting != null && resultGetSystemSetting.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS && resultGetSystemSetting.getResult().value.equals("2000")) {
             System.out.println("success");
         } else {

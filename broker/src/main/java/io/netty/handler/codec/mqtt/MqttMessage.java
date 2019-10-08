@@ -42,10 +42,10 @@ public class MqttMessage {
     }
 
     public MqttMessage(
-            MqttFixedHeader mqttFixedHeader,
-            Object variableHeader,
-            Object payload,
-            DecoderResult decoderResult) {
+        MqttFixedHeader mqttFixedHeader,
+        Object variableHeader,
+        Object payload,
+        DecoderResult decoderResult) {
         this.mqttFixedHeader = mqttFixedHeader;
         this.variableHeader = variableHeader;
         this.payload = payload;

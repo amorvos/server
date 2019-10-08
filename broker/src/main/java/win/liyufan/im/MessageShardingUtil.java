@@ -31,11 +31,12 @@ public class MessageShardingUtil {
     /**
      * ID = timestamp(43) + nodeId(6) + rotateId(15)
      * 所以时间限制是到2157/5/15（2的42次幂代表的时间 + (2018-1970)）。节点数限制是小于64，每台服务器每毫秒最多发送32768条消息
+     *
      * @return
      */
     public static long generateId() {
         mLock.lock();
-        rotateId = (rotateId + 1)&rotateIdMask;
+        rotateId = (rotateId + 1) & rotateIdMask;
         mLock.unLock();
 
         long id = System.currentTimeMillis() - T201801010000;
@@ -84,7 +85,7 @@ public class MessageShardingUtil {
         month = month - 1;
         if (month == -1) {
             month = 11;
-            year = (year + 3 - 1)%3;
+            year = (year + 3 - 1) % 3;
         }
         return "t_messages_" + (year * 12 + month);
     }

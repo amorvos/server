@@ -16,26 +16,32 @@
 
 package io.moquette.persistence;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.WFCMessage;
 import io.moquette.server.Constants;
 import io.moquette.server.Server;
 import io.moquette.spi.ClientSession;
 import io.moquette.spi.IMessagesStore.StoredMessage;
 import io.moquette.spi.ISessionsStore;
-
 import io.netty.handler.codec.mqtt.MqttVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cn.wildfirechat.common.ErrorCode;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class MemorySessionStore implements ISessionsStore {
     private static int dumy = 1;
     private static final Logger LOG = LoggerFactory.getLogger(MemorySessionStore.class);
 
-    public static class Session implements Comparable<Session>{
+    public static class Session implements Comparable<Session> {
         final String clientID;
         String username;
         private String appName;
@@ -146,7 +152,7 @@ public class MemorySessionStore implements ISessionsStore {
         final BlockingQueue<StoredMessage> queue = new ArrayBlockingQueue<>(Constants.MAX_MESSAGE_QUEUE);
         final Map<Integer, StoredMessage> secondPhaseStore = new ConcurrentHashMap<>();
         final Map<Integer, StoredMessage> outboundFlightMessages =
-                Collections.synchronizedMap(new HashMap<Integer, StoredMessage>());
+            Collections.synchronizedMap(new HashMap<Integer, StoredMessage>());
         final Map<Integer, StoredMessage> inboundFlightMessages = new ConcurrentHashMap<>();
 
         public Session(String username, String clientID, ClientSession clientSession) {
@@ -180,20 +186,20 @@ public class MemorySessionStore implements ISessionsStore {
         }
 
         public String getClientID() {
-			return clientID;
-		}
+            return clientID;
+        }
 
-		public String getUsername() {
-			return username;
-		}
+        public String getUsername() {
+            return username;
+        }
 
         public void setUsername(String username) {
             this.username = username;
         }
 
         public ClientSession getClientSession() {
-			return clientSession;
-		}
+            return clientSession;
+        }
 
         public String getSecret() {
             return secret;
@@ -220,17 +226,17 @@ public class MemorySessionStore implements ISessionsStore {
         }
 
         @Override
-		public int compareTo(Session o) {
-			// TODO Auto-generated method stub
-			if (clientID.equals(o.clientID) && username.equals(o.username)) {
-				return 0;
-			}
-			if (clientID.equals(o.clientID)) {
-				return username.compareTo(o.username);
-			} else {
-				return clientID.compareTo(o.clientID);
-			}
-		}
+        public int compareTo(Session o) {
+            // TODO Auto-generated method stub
+            if (clientID.equals(o.clientID) && username.equals(o.username)) {
+                return 0;
+            }
+            if (clientID.equals(o.clientID)) {
+                return username.compareTo(o.username);
+            } else {
+                return clientID.compareTo(o.clientID);
+            }
+        }
 
 
         public MqttVersion getMqttVersion() {
@@ -247,9 +253,10 @@ public class MemorySessionStore implements ISessionsStore {
 
     private final Server mServer;
     private final DatabaseStore databaseStore;
+
     public MemorySessionStore(Server server, DatabaseStore databaseStore) {
-    		mServer = server;
-    		this.databaseStore = databaseStore;
+        mServer = server;
+        this.databaseStore = databaseStore;
     }
 
     @Override
@@ -315,9 +322,9 @@ public class MemorySessionStore implements ISessionsStore {
         sessions.put(clientID, session);
         ConcurrentSkipListSet<String> sessionSet = userSessions.get(username);
         if (sessionSet == null) {
-			sessionSet = new ConcurrentSkipListSet<>();
-			userSessions.put(username, sessionSet);
-		}
+            sessionSet = new ConcurrentSkipListSet<>();
+            userSessions.put(username, sessionSet);
+        }
         sessionSet = userSessions.get(username);
         sessionSet.add(clientID);
 
@@ -334,7 +341,7 @@ public class MemorySessionStore implements ISessionsStore {
         }
         if (!session.getUsername().equals(username)) {
             ConcurrentSkipListSet<String> sessionSet = userSessions.get(session.getUsername());
-            if(sessionSet != null) {
+            if (sessionSet != null) {
                 sessionSet.remove(clientID);
             }
         }
@@ -395,15 +402,14 @@ public class MemorySessionStore implements ISessionsStore {
 
     @Override
     public Collection<Session> sessionForUser(String username) {
-    	ConcurrentSkipListSet<String> sessionSet = userSessions.get(username);
+        ConcurrentSkipListSet<String> sessionSet = userSessions.get(username);
         if (sessionSet == null) {
-			sessionSet = new ConcurrentSkipListSet<String>();
-			userSessions.put(username, sessionSet);
-		}
+            sessionSet = new ConcurrentSkipListSet<String>();
+            userSessions.put(username, sessionSet);
+        }
         sessionSet = userSessions.get(username);
         ArrayList<Session> out = new ArrayList<>();
-        for (String clientId : sessionSet
-             ) {
+        for (String clientId : sessionSet) {
             Session session = sessions.get(clientId);
             if (session != null && session.getUsername().equals(username)) {
                 out.add(session);
@@ -507,8 +513,9 @@ public class MemorySessionStore implements ISessionsStore {
 
     @Override
     public void markAsInboundInflight(String clientID, int messageID, StoredMessage msg) {
-        if (!sessions.containsKey(clientID))
+        if (!sessions.containsKey(clientID)) {
             LOG.error("Can't find the session for client <{}>", clientID);
+        }
 
         sessions.get(clientID).inboundFlightMessages.put(messageID, msg);
     }
@@ -544,9 +551,9 @@ public class MemorySessionStore implements ISessionsStore {
         }
         ConcurrentSkipListSet<String> sessionSet = userSessions.get(session.username);
         if (sessionSet == null) {
-			sessionSet = new ConcurrentSkipListSet<>();
-			userSessions.put(session.username, sessionSet);
-		}
+            sessionSet = new ConcurrentSkipListSet<>();
+            userSessions.put(session.username, sessionSet);
+        }
         sessionSet = userSessions.get(session.username);
         sessionSet.remove(clientID);
 

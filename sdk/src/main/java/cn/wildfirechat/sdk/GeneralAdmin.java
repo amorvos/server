@@ -1,7 +1,9 @@
 package cn.wildfirechat.sdk;
 
 import cn.wildfirechat.common.APIPath;
-import cn.wildfirechat.pojos.*;
+import cn.wildfirechat.pojos.InputCreateChannel;
+import cn.wildfirechat.pojos.OutputCreateChannel;
+import cn.wildfirechat.pojos.SystemSettingPojo;
 import cn.wildfirechat.sdk.model.IMResult;
 import cn.wildfirechat.sdk.utilities.AdminHttpUtils;
 

@@ -9,7 +9,10 @@
 package cn.wildfirechat.pojos;
 
 public class OutputCheckUserOnline {
-    private int status; //0 online, 1 have session offline, 2 no session
+    /**
+     * 0 online, 1 have session offline, 2 no session
+     */
+    private int status;
 
     public int getStatus() {
         return status;

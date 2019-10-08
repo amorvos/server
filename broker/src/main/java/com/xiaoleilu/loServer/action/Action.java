@@ -8,6 +8,7 @@
 
 package com.xiaoleilu.loServer.action;
 
+import cn.wildfirechat.common.ErrorCode;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.annotation.RequireAuthentication;
@@ -20,7 +21,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import cn.wildfirechat.common.ErrorCode;
 
 import java.nio.charset.StandardCharsets;
 
@@ -29,8 +29,8 @@ import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
 /**
  * 请求处理接口<br>
  * 当用户请求某个Path，则调用相应Action的doAction方法
- * @author Looly
  *
+ * @author Looly
  */
 
 abstract public class Action {
@@ -46,7 +46,8 @@ abstract public class Action {
 
         return ERROR_CODE_SUCCESS;
     }
-	public boolean doAction(Request request, Response response) {
+
+    public boolean doAction(Request request, Response response) {
         ErrorCode errorCode = preAction(request, response);
         boolean isSync = true;
         if (errorCode == ErrorCode.ERROR_CODE_SUCCESS) {
@@ -77,9 +78,11 @@ abstract public class Action {
 
         return isSync;
     }
+
     public boolean isTransactionAction() {
         return false;
     }
+
     abstract public boolean action(Request request, Response response);
 
     protected <T> T getRequestBody(HttpRequest request, Class<T> cls) {

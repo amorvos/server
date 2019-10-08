@@ -54,25 +54,34 @@ public class InputOutputUserInfo {
     public WFCMessage.User toUser() {
         WFCMessage.User.Builder newUserBuilder = WFCMessage.User.newBuilder()
             .setUid(userId);
-        if (name != null)
+        if (name != null) {
             newUserBuilder.setName(name);
-        if (displayName != null)
+        }
+        if (displayName != null) {
             newUserBuilder.setDisplayName(displayName);
-        if (getPortrait() != null)
+        }
+        if (getPortrait() != null) {
             newUserBuilder.setPortrait(getPortrait());
-        if (getEmail() != null)
+        }
+        if (getEmail() != null) {
             newUserBuilder.setEmail(getEmail());
-        if (getAddress() != null)
+        }
+        if (getAddress() != null) {
             newUserBuilder.setAddress(getAddress());
-        if (getCompany() != null)
+        }
+        if (getCompany() != null) {
             newUserBuilder.setCompany(getCompany());
-        if (getSocial() != null)
+        }
+        if (getSocial() != null) {
             newUserBuilder.setSocial(getSocial());
+        }
 
-        if (getMobile() != null)
+        if (getMobile() != null) {
             newUserBuilder.setMobile(getMobile());
-        if (getExtra() != null)
+        }
+        if (getExtra() != null) {
             newUserBuilder.setExtra(getExtra());
+        }
         newUserBuilder.setGender(gender);
 
         newUserBuilder.setUpdateDt(System.currentTimeMillis());

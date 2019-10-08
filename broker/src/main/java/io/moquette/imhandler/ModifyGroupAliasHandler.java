@@ -8,11 +8,11 @@
 
 package io.moquette.imhandler;
 
-import cn.wildfirechat.proto.WFCMessage;
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.GroupNotificationBinaryContent;
+import cn.wildfirechat.proto.WFCMessage;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
@@ -23,7 +23,7 @@ public class ModifyGroupAliasHandler extends GroupHandler<WFCMessage.ModifyGroup
     public ErrorCode action(ByteBuf ackPayload, String clientID, String fromUser, boolean isAdmin, WFCMessage.ModifyGroupMemberAlias request, Qos1PublishHandler.IMCallback callback) {
         ErrorCode errorCode = m_messagesStore.modifyGroupAlias(fromUser, request.getGroupId(), request.getAlias());
         if (errorCode == ERROR_CODE_SUCCESS && request.hasNotifyContent()) {
-            if (request.hasNotifyContent()&& request.getNotifyContent().getType() > 0) {
+            if (request.hasNotifyContent() && request.getNotifyContent().getType() > 0) {
                 sendGroupNotification(fromUser, request.getGroupId(), request.getToLineList(), request.getNotifyContent());
             } else {
                 WFCMessage.MessageContent content = new GroupNotificationBinaryContent(request.getGroupId(), fromUser, request.getAlias(), "").getModifyGroupMemberAliasNotifyContent();

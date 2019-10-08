@@ -50,22 +50,13 @@ public class ClassUtil {
     public static List<Class<?>> getClasses(Class<?> cls) throws IOException,
         ClassNotFoundException {
         String pk = cls.getPackage().getName();
-//        String path = pk.replace('.', '/');
-//        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-//        URL url = classloader.getResource(path);
-//        String type = url.getProtocol();
-//
-//        System.out.println("the type is " + type);
-//        System.out.println(url.getPath());
-//
-//        return getClasses(new File(url.getFile()), pk);
         List<String> classNames = getClassName(pk, true);
         List<Class<?>> classes = new ArrayList<>();
         for (String className :
-             classNames) {
+            classNames) {
             if (className.endsWith(".class")) {
                 className = className.substring(0, className.length() - 6);
-                className = className.substring(className.lastIndexOf("/")+1, className.length());
+                className = className.substring(className.lastIndexOf("/") + 1, className.length());
             }
 
             classes.add(Class.forName(className));
@@ -100,11 +91,10 @@ public class ClassUtil {
     }
 
 
-
-
     /**
      * 获取某包下所有类
-     * @param packageName 包名
+     *
+     * @param packageName  包名
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
      */
@@ -128,8 +118,9 @@ public class ClassUtil {
 
     /**
      * 从项目文件获取某包下所有类
-     * @param filePath 文件路径
-     * @param className 类名集合
+     *
+     * @param filePath     文件路径
+     * @param className    类名集合
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
      */
@@ -164,7 +155,8 @@ public class ClassUtil {
 
     /**
      * 从jar获取某包下所有类
-     * @param jarPath jar文件路径
+     *
+     * @param jarPath      jar文件路径
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
      */
@@ -209,8 +201,9 @@ public class ClassUtil {
 
     /**
      * 从所有jar中搜索该包，并获取该包下所有类
-     * @param urls URL集合
-     * @param packagePath 包路径
+     *
+     * @param urls         URL集合
+     * @param packagePath  包路径
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
      */

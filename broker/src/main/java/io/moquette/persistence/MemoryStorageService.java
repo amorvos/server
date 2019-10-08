@@ -23,8 +23,6 @@ import io.moquette.spi.IMessagesStore;
 import io.moquette.spi.ISessionsStore;
 import io.moquette.spi.IStore;
 
-import java.util.concurrent.ScheduledExecutorService;
-
 public class MemoryStorageService implements IStore {
 
     private MemorySessionStore m_sessionsStore;

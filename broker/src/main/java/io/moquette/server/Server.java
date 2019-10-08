@@ -21,15 +21,24 @@ import cn.wildfirechat.server.ThreadPoolExecutorWrapper;
 import com.hazelcast.config.ClasspathXmlConfig;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.FileSystemXmlConfig;
-import com.hazelcast.core.*;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
+import com.hazelcast.core.ISet;
 import com.xiaoleilu.loServer.LoServer;
 import com.xiaoleilu.loServer.ServerSetting;
-import com.xiaoleilu.loServer.action.admin.AdminAction;
+import com.xiaoleilu.loServer.action.admin.AbstractAdminAction;
 import io.moquette.BrokerConstants;
-import io.moquette.persistence.*;
 import io.moquette.connections.IConnectionsManager;
-import io.moquette.interception.*;
-import io.moquette.server.config.*;
+import io.moquette.interception.InterceptHandler;
+import io.moquette.persistence.MemoryStorageService;
+import io.moquette.persistence.RPCCenter;
+import io.moquette.server.config.FileResourceLoader;
+import io.moquette.server.config.IConfig;
+import io.moquette.server.config.IResourceLoader;
+import io.moquette.server.config.MediaServerConfig;
+import io.moquette.server.config.MemoryConfig;
+import io.moquette.server.config.ResourceLoaderConfig;
 import io.moquette.server.netty.NettyAcceptor;
 import io.moquette.spi.IStore;
 import io.moquette.spi.impl.ProtocolProcessor;
@@ -40,10 +49,9 @@ import io.moquette.spi.security.IAuthorizator;
 import io.moquette.spi.security.ISslContextCreator;
 import io.moquette.spi.security.Tokenor;
 import io.netty.util.ResourceLeakDetector;
-import win.liyufan.im.DBUtil;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import win.liyufan.im.DBUtil;
 import win.liyufan.im.MessageShardingUtil;
 import win.liyufan.im.Utility;
 
@@ -55,7 +63,12 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
-import static io.moquette.BrokerConstants.*;
+import static io.moquette.BrokerConstants.HTTP_SERVER_API_NO_CHECK_TIME;
+import static io.moquette.BrokerConstants.HTTP_SERVER_SECRET_KEY;
+import static io.moquette.BrokerConstants.HZ_Cluster_Node_External_IP;
+import static io.moquette.BrokerConstants.HZ_Cluster_Node_External_Long_Port;
+import static io.moquette.BrokerConstants.HZ_Cluster_Node_External_Short_Port;
+import static io.moquette.BrokerConstants.HZ_Cluster_Node_ID;
 import static io.moquette.logging.LoggingUtils.getInterceptorIds;
 
 /**
@@ -64,10 +77,10 @@ import static io.moquette.logging.LoggingUtils.getInterceptorIds;
 public class Server {
     private final static String BANNER =
         "            _  _      _   __  _                    _             _   \n" +
-        " __      __(_)| |  __| | / _|(_) _ __  ___    ___ | |__    __ _ | |_ \n" +
-        " \\ \\ /\\ / /| || | / _` || |_ | || '__|/ _ \\  / __|| '_ \\  / _` || __|\n" +
-        "  \\ V  V / | || || (_| ||  _|| || |  |  __/ | (__ | | | || (_| || |_ \n" +
-        "   \\_/\\_/  |_||_| \\__,_||_|  |_||_|   \\___|  \\___||_| |_| \\__,_| \\__|\n";
+            " __      __(_)| |  __| | / _|(_) _ __  ___    ___ | |__    __ _ | |_ \n" +
+            " \\ \\ /\\ / /| || | / _` || |_ | || '__|/ _ \\  / __|| '_ \\  / _` || __|\n" +
+            "  \\ V  V / | || || (_| ||  _|| || |  |  __/ | (__ | | | || (_| || |_ \n" +
+            "   \\_/\\_/  |_||_| \\__,_||_|  |_||_|   \\___|  \\___||_| |_| \\__,_| \\__|\n";
 
 
     private static final Logger LOG = LoggerFactory.getLogger(Server.class);
@@ -94,6 +107,7 @@ public class Server {
     private IConfig mConfig;
 
     private IStore m_store;
+
     static {
         System.out.println(BANNER);
     }
@@ -102,7 +116,7 @@ public class Server {
         instance = new Server();
         final IConfig config = defaultConfig();
 
-        System.setProperty("hazelcast.logging.type", "none" );
+        System.setProperty("hazelcast.logging.type", "none");
         instance.mConfig = config;
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.ADVANCED);
 
@@ -111,8 +125,8 @@ public class Server {
         int httpLocalPort = Integer.parseInt(config.getProperty(BrokerConstants.HTTP_LOCAL_PORT));
         int httpAdminPort = Integer.parseInt(config.getProperty(BrokerConstants.HTTP_ADMIN_PORT));
 
-        AdminAction.setSecretKey(config.getProperty(HTTP_SERVER_SECRET_KEY));
-        AdminAction.setNoCheckTime(config.getProperty(HTTP_SERVER_API_NO_CHECK_TIME));
+        AbstractAdminAction.setSecretKey(config.getProperty(HTTP_SERVER_SECRET_KEY));
+        AbstractAdminAction.setNoCheckTime(config.getProperty(HTTP_SERVER_API_NO_CHECK_TIME));
 
         final LoServer httpServer = new LoServer(httpLocalPort, httpAdminPort, instance.m_processor.getMessagesStore(), instance.m_store.sessionsStore());
         try {
@@ -135,8 +149,7 @@ public class Server {
     /**
      * Starts Moquette bringing the configuration from the file located at m_config/wildfirechat.conf
      *
-     * @throws IOException
-     *             in case of any IO error.
+     * @throws IOException in case of any IO error.
      */
     public void startServer() throws IOException {
         final IConfig config = defaultConfig();
@@ -151,7 +164,8 @@ public class Server {
     }
 
     private static File defaultConfigFile() {
-        String configPath = System.getProperty("wildfirechat.path", null);
+        String defaultPath = Server.class.getResource("/").getPath();
+        String configPath = System.getProperty("wildfirechat.path", defaultPath);
         return new File(configPath, IConfig.DEFAULT_CONFIG);
     }
 
@@ -159,10 +173,8 @@ public class Server {
     /**
      * Starts Moquette bringing the configuration from the given file
      *
-     * @param configFile
-     *            text file that contains the configuration.
-     * @throws IOException
-     *             in case of any IO Error.
+     * @param configFile text file that contains the configuration.
+     * @throws IOException in case of any IO Error.©
      */
     public void startServer(File configFile) throws IOException {
         LOG.info("Starting Moquette server. Configuration file path={}", configFile.getAbsolutePath());
@@ -174,11 +186,8 @@ public class Server {
     /**
      * Starts the server with the given properties.
      *
-     *
-     * @param configProps
-     *            the properties map to use as configuration.
-     * @throws IOException
-     *             in case of any IO Error.
+     * @param configProps the properties map to use as configuration.
+     * @throws IOException in case of any IO Error.
      */
     public void startServer(Properties configProps) throws IOException {
         LOG.info("Starting Moquette server using properties object");
@@ -189,10 +198,8 @@ public class Server {
     /**
      * Starts Moquette bringing the configuration files from the given Config implementation.
      *
-     * @param config
-     *            the configuration to use to start the broker.
-     * @throws IOException
-     *             in case of any IO Error.
+     * @param config the configuration to use to start the broker.
+     * @throws IOException in case of any IO Error.
      */
     public void startServer(IConfig config) throws IOException {
         LOG.info("Starting Moquette server using IConfig instance...");
@@ -203,12 +210,9 @@ public class Server {
      * Starts Moquette with config provided by an implementation of IConfig class and with the set
      * of InterceptHandler.
      *
-     * @param config
-     *            the configuration to use to start the broker.
-     * @param handlers
-     *            the handlers to install in the broker.
-     * @throws IOException
-     *             in case of any IO Error.
+     * @param config   the configuration to use to start the broker.
+     * @param handlers the handlers to install in the broker.
+     * @throws IOException in case of any IO Error.
      */
     public void startServer(IConfig config, List<? extends InterceptHandler> handlers) throws IOException {
         LOG.info("Starting moquette server using IConfig instance and intercept handlers");
@@ -216,19 +220,19 @@ public class Server {
     }
 
     public void startServer(IConfig config, List<? extends InterceptHandler> handlers, ISslContextCreator sslCtxCreator,
-            IAuthenticator authenticator, IAuthorizator authorizator) throws IOException {
+                            IAuthenticator authenticator, IAuthorizator authorizator) throws IOException {
         if (handlers == null) {
             handlers = Collections.emptyList();
         }
         DBUtil.init(config);
         String strKey = config.getProperty(BrokerConstants.CLIENT_PROTO_SECRET_KEY);
         String[] strs = strKey.split(",");
-        if(strs.length != 16) {
+        if (strs.length != 16) {
             LOG.error("Key error, it length should be 16");
         }
         byte[] keys = new byte[16];
         for (int i = 0; i < 16; i++) {
-            keys[i] = (byte)(Integer.parseInt(strs[i].replace("0X", "").replace("0x", ""), 16));
+            keys[i] = (byte) (Integer.parseInt(strs[i].replace("0X", "").replace("0x", ""), 16));
         }
 
 
@@ -293,10 +297,10 @@ public class Server {
     }
 
     private void initMediaServerConfig(IConfig config) {
-    	MediaServerConfig.QINIU_ACCESS_KEY = config.getProperty(BrokerConstants.QINIU_ACCESS_KEY, MediaServerConfig.QINIU_ACCESS_KEY);
-    	MediaServerConfig.QINIU_SECRET_KEY = config.getProperty(BrokerConstants.QINIU_SECRET_KEY, MediaServerConfig.QINIU_SECRET_KEY);
-    	MediaServerConfig.QINIU_SERVER_URL = config.getProperty(BrokerConstants.QINIU_SERVER_URL, MediaServerConfig.QINIU_SERVER_URL);
-    	if (MediaServerConfig.QINIU_SERVER_URL.contains("//")) {
+        MediaServerConfig.QINIU_ACCESS_KEY = config.getProperty(BrokerConstants.QINIU_ACCESS_KEY, MediaServerConfig.QINIU_ACCESS_KEY);
+        MediaServerConfig.QINIU_SECRET_KEY = config.getProperty(BrokerConstants.QINIU_SECRET_KEY, MediaServerConfig.QINIU_SECRET_KEY);
+        MediaServerConfig.QINIU_SERVER_URL = config.getProperty(BrokerConstants.QINIU_SERVER_URL, MediaServerConfig.QINIU_SERVER_URL);
+        if (MediaServerConfig.QINIU_SERVER_URL.contains("//")) {
             MediaServerConfig.QINIU_SERVER_URL = MediaServerConfig.QINIU_SERVER_URL.substring(MediaServerConfig.QINIU_SERVER_URL.indexOf("//") + 2);
         }
 
@@ -322,7 +326,7 @@ public class Server {
         MediaServerConfig.QINIU_BUCKET_FAVORITE_DOMAIN = config.getProperty(BrokerConstants.QINIU_BUCKET_FAVORITE_DOMAIN);
 
 
-    	MediaServerConfig.SERVER_IP = getServerIp(config);
+        MediaServerConfig.SERVER_IP = getServerIp(config);
 
         MediaServerConfig.HTTP_SERVER_PORT = Integer.parseInt(config.getProperty(BrokerConstants.HTTP_SERVER_PORT));
 
@@ -335,6 +339,7 @@ public class Server {
 
         MediaServerConfig.USER_QINIU = Integer.parseInt(config.getProperty(BrokerConstants.USER_QINIU)) > 0;
     }
+
     private String getServerIp(IConfig config) {
         String serverIp = config.getProperty(BrokerConstants.SERVER_IP_PROPERTY_NAME);
 
@@ -343,6 +348,7 @@ public class Server {
         }
         return serverIp;
     }
+
     private boolean configureCluster(IConfig config) throws FileNotFoundException {
         LOG.info("Configuring embedded Hazelcast instance");
         String serverIp = getServerIp(config);
@@ -354,8 +360,8 @@ public class Server {
         if (hzConfigPath != null) {
             boolean isHzConfigOnClasspath = this.getClass().getClassLoader().getResource(hzConfigPath) != null;
             Config hzconfig = isHzConfigOnClasspath
-                    ? new ClasspathXmlConfig(hzConfigPath)
-                    : new FileSystemXmlConfig(hzConfigPath);
+                ? new ClasspathXmlConfig(hzConfigPath)
+                : new FileSystemXmlConfig(hzConfigPath);
             LOG.info("Starting Hazelcast instance. ConfigurationFile={}", hzconfig);
             hazelcastInstance = Hazelcast.newHazelcastInstance(hzconfig);
         } else {
@@ -371,10 +377,10 @@ public class Server {
         int nodeId;
         try {
             nodeId = Integer.parseInt(nodeIdStr);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new IllegalArgumentException("nodeId error: " + nodeIdStr);
         }
-        if (nodeIdSet != null && nodeIdSet.contains(nodeId)){
+        if (nodeIdSet != null && nodeIdSet.contains(nodeId)) {
             LOG.error("只允许一个实例运行，多个实例会引起冲突，进程终止");
             System.exit(-1);
         }
@@ -430,8 +436,7 @@ public class Server {
     /**
      * SPI method used by Broker embedded applications to add intercept handlers.
      *
-     * @param interceptHandler
-     *            the handler to add.
+     * @param interceptHandler the handler to add.
      */
     public void addInterceptHandler(InterceptHandler interceptHandler) {
         if (!m_initialized) {
@@ -446,8 +451,7 @@ public class Server {
     /**
      * SPI method used by Broker embedded applications to remove intercept handlers.
      *
-     * @param interceptHandler
-     *            the handler to remove.
+     * @param interceptHandler the handler to remove.
      */
     public void removeInterceptHandler(InterceptHandler interceptHandler) {
         if (!m_initialized) {

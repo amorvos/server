@@ -9,6 +9,9 @@
 package com.xiaoleilu.loServer.action.admin;
 
 import cn.wildfirechat.common.APIPath;
+import cn.wildfirechat.common.ErrorCode;
+import cn.wildfirechat.pojos.InputCreateRobot;
+import cn.wildfirechat.pojos.OutputCreateRobot;
 import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
@@ -16,17 +19,14 @@ import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import cn.wildfirechat.pojos.InputCreateRobot;
-import cn.wildfirechat.pojos.OutputCreateRobot;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.UUIDGenerator;
 
 @Route(APIPath.Create_Robot)
 @HttpMethod("POST")
-public class CreateRobotAction extends AdminAction {
+public class CreateRobotAction extends AbstractAdminAction {
 
     @Override
     public boolean isTransactionAction() {
@@ -40,11 +40,11 @@ public class CreateRobotAction extends AdminAction {
             if (inputCreateRobot != null
                 && !StringUtil.isNullOrEmpty(inputCreateRobot.getName())) {
 
-                if(StringUtil.isNullOrEmpty(inputCreateRobot.getPassword())) {
+                if (StringUtil.isNullOrEmpty(inputCreateRobot.getPassword())) {
                     inputCreateRobot.setPassword(UUIDGenerator.getUUID());
                 }
 
-                if(StringUtil.isNullOrEmpty(inputCreateRobot.getUserId())) {
+                if (StringUtil.isNullOrEmpty(inputCreateRobot.getUserId())) {
                     inputCreateRobot.setUserId(messagesStore.getShortUUID());
                 }
 

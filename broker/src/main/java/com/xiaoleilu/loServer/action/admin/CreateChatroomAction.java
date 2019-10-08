@@ -9,6 +9,9 @@
 package com.xiaoleilu.loServer.action.admin;
 
 import cn.wildfirechat.common.APIPath;
+import cn.wildfirechat.common.ErrorCode;
+import cn.wildfirechat.pojos.InputCreateChatroom;
+import cn.wildfirechat.pojos.OutputCreateChatroom;
 import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
@@ -16,17 +19,14 @@ import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import cn.wildfirechat.pojos.InputCreateChatroom;
-import cn.wildfirechat.pojos.OutputCreateChatroom;
 import io.moquette.spi.impl.Utils;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
-import cn.wildfirechat.common.ErrorCode;
 
 @Route(APIPath.Create_Chatroom)
 @HttpMethod("POST")
-public class CreateChatroomAction extends AdminAction {
+public class CreateChatroomAction extends AbstractAdminAction {
 
     @Override
     public boolean isTransactionAction() {
@@ -36,7 +36,7 @@ public class CreateChatroomAction extends AdminAction {
     @Override
     public boolean action(Request request, Response response) {
         if (request.getNettyRequest() instanceof FullHttpRequest) {
-            FullHttpRequest fullHttpRequest = (FullHttpRequest)request.getNettyRequest();
+            FullHttpRequest fullHttpRequest = (FullHttpRequest) request.getNettyRequest();
             byte[] bytes = Utils.readBytesAndRewind(fullHttpRequest.content());
             String content = new String(bytes);
             Gson gson = new Gson();

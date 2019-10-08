@@ -19,6 +19,7 @@ public class MessageLoader implements MapStore<Long, MessageBundle> {
     private DatabaseStore getDatabaseStore() {
         return Server.getServer().getStore().messagesStore().getDatabaseStore();
     }
+
     /**
      * Loads the value of a given key. If distributed map doesn't contain the value
      * for the given key then Hazelcast will call implementation's load (key) method

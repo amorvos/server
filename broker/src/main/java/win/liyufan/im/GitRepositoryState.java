@@ -8,7 +8,11 @@
 
 package win.liyufan.im;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Properties;
 
 public class GitRepositoryState {
@@ -67,7 +71,7 @@ public class GitRepositoryState {
             BufferedReader bf = new BufferedReader(new InputStreamReader(inputStream));
             properties.load(bf);
         } catch (IOException e) {
-            
+
         }
         GitRepositoryState gitRepositoryState = new GitRepositoryState(properties);
         return gitRepositoryState;

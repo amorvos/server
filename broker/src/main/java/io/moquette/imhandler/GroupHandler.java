@@ -40,7 +40,7 @@ abstract public class GroupHandler<T> extends IMHandler<T> {
         List<String> out = new ArrayList<>();
         if (groupMembers != null) {
             for (WFCMessage.GroupMember gm : groupMembers
-                 ) {
+            ) {
                 out.add(gm.getMemberId());
             }
         }

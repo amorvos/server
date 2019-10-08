@@ -10,28 +10,28 @@ package com.xiaoleilu.loServer.action.admin;
 
 
 import cn.wildfirechat.common.APIPath;
+import cn.wildfirechat.common.ErrorCode;
+import cn.wildfirechat.pojos.InputCreateGroup;
+import cn.wildfirechat.pojos.OutputCreateGroupResult;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import cn.wildfirechat.pojos.InputCreateGroup;
-import cn.wildfirechat.pojos.OutputCreateGroupResult;
 import io.moquette.persistence.RPCCenter;
 import io.moquette.persistence.TargetEntry;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 import java.util.concurrent.Executor;
 
 @Route(APIPath.Create_Group)
 @HttpMethod("POST")
-public class CreateGroupAction extends AdminAction {
+public class CreateGroupAction extends AbstractAdminAction {
 
     @Override
     public boolean isTransactionAction() {

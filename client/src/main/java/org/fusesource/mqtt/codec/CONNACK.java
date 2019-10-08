@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,11 +18,13 @@
 
 package org.fusesource.mqtt.codec;
 
-import org.fusesource.hawtbuf.*;
+import org.fusesource.hawtbuf.DataByteArrayInputStream;
+import org.fusesource.hawtbuf.DataByteArrayOutputStream;
 
 import java.io.IOException;
 import java.net.ProtocolException;
-import static org.fusesource.mqtt.codec.MessageSupport.*;
+
+import static org.fusesource.mqtt.codec.MessageSupport.Message;
 
 /**
  * <p>
@@ -48,17 +50,18 @@ public class CONNACK implements Message {
     private Code code = Code.CONNECTION_ACCEPTED;
 
 
-    
+    @Override
     public byte messageType() {
         return TYPE;
     }
 
+    @Override
     public CONNACK decode(MQTTFrame frame) throws ProtocolException {
-        assert(frame.buffers.length == 1);
+        assert (frame.buffers.length == 1);
         DataByteArrayInputStream is = new DataByteArrayInputStream(frame.buffers[0]);
         is.skip(1);
         byte c = is.readByte();
-        if( c >= Code.values().length ) {
+        if (c >= Code.values().length) {
             throw new ProtocolException("Invalid CONNACK encoding");
         }
         code = Code.values()[c];
@@ -70,7 +73,8 @@ public class CONNACK implements Message {
         }
         return this;
     }
-    
+
+    @Override
     public MQTTFrame encode() {
         try {
             DataByteArrayOutputStream os = new DataByteArrayOutputStream(2);
@@ -97,7 +101,7 @@ public class CONNACK implements Message {
     @Override
     public String toString() {
         return "CONNACK{" +
-                "code=" + code +
-                '}';
+            "code=" + code +
+            '}';
     }
 }

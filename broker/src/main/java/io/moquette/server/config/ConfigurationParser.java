@@ -18,6 +18,7 @@ package io.moquette.server.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,7 +30,7 @@ import java.util.Properties;
 
 /**
  * Mosquitto configuration parser.
- *
+ * <p>
  * A line that at the very first has # is a comment Each line has key value format, where the
  * separator used it the space.
  */
@@ -49,9 +50,9 @@ class ConfigurationParser {
         }
         if (!file.exists()) {
             LOG.warn(
-                    String.format(
-                            "parsing not existing file %s, so fallback on default configuration!",
-                            file.getAbsolutePath()));
+                String.format(
+                    "parsing not existing file %s, so fallback on default configuration!",
+                    file.getAbsolutePath()));
             return;
         }
         try {
@@ -59,10 +60,10 @@ class ConfigurationParser {
             parse(reader);
         } catch (FileNotFoundException fex) {
             LOG.warn(
-                    String.format(
-                            "parsing not existing file %s, so fallback on default configuration!",
-                            file.getAbsolutePath()),
-                    fex);
+                String.format(
+                    "parsing not existing file %s, so fallback on default configuration!",
+                    file.getAbsolutePath()),
+                fex);
             return;
         }
     }
@@ -70,8 +71,7 @@ class ConfigurationParser {
     /**
      * Parse the configuration
      *
-     * @throws ParseException
-     *             if the format is not compliant.
+     * @throws ParseException if the format is not compliant.
      */
     void parse(Reader reader) throws ParseException {
         if (reader == null) {

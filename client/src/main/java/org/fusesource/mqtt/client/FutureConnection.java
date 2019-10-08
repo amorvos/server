@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,7 +44,7 @@ public class FutureConnection {
 
     private volatile boolean connected;
 
-    private long receiveBuffer = 1024*1024;
+    private long receiveBuffer = 1024 * 1024;
     private long receiveBufferRemaining = receiveBuffer;
     private boolean receiveBufferFull = false;
 
@@ -52,27 +52,33 @@ public class FutureConnection {
         this.next = next;
         this.next.listener(new ExtendedListener() {
 
+            @Override
             public void onConnected() {
                 connected = true;
             }
 
+            @Override
             public void onDisconnected() {
                 connected = false;
             }
 
 
+            @Override
             public void onPublish(UTF8Buffer topic, final Buffer payload, final Callback<Callback<byte[]>> onComplete) {
                 getDispatchQueue().assertExecuting();
                 receiveBufferRemaining -= payload.length();
-                if( !receiveBufferFull && receiveBufferRemaining <=0 ) {
+                if (!receiveBufferFull && receiveBufferRemaining <= 0) {
                     receiveBufferFull = true;
                     suspend();
                 }
                 deliverMessage(new Message(getDispatchQueue(), topic, payload, new Callback<Callback<byte[]>>() {
+                    @Override
                     public void onSuccess(Callback<byte[]> value) {
                         processed();
                         onComplete.onSuccess(value);
                     }
+
+                    @Override
                     public void onFailure(Throwable value) {
                         processed();
                         onComplete.onFailure(value);
@@ -81,7 +87,7 @@ public class FutureConnection {
                     private void processed() {
                         getDispatchQueue().assertExecuting();
                         receiveBufferRemaining += payload.length();
-                        if( receiveBufferFull && receiveBufferRemaining >0 ) {
+                        if (receiveBufferFull && receiveBufferRemaining > 0) {
                             receiveBufferFull = false;
                             resume();
                         }
@@ -90,16 +96,21 @@ public class FutureConnection {
                 }));
             }
 
+            @Override
             public void onPublish(UTF8Buffer topic, Buffer payload, final Runnable onComplete) {
                 onPublish(topic, payload, new Callback<Callback<byte[]>>() {
+                    @Override
                     public void onSuccess(Callback<byte[]> value) {
                         onComplete.run();
                     }
+
+                    @Override
                     public void onFailure(Throwable value) {
                     }
                 });
             }
 
+            @Override
             public void onFailure(Throwable value) {
                 getDispatchQueue().assertExecuting();
                 ArrayList<Promise<?>> tmp = new ArrayList<Promise<?>>(receiveFutures);
@@ -113,7 +124,7 @@ public class FutureConnection {
     }
 
     void deliverMessage(Message msg) {
-        if( receiveFutures.isEmpty() ) {
+        if (receiveFutures.isEmpty()) {
             receivedFrames.add(msg);
         } else {
             receiveFutures.removeFirst().onSuccess(msg);
@@ -121,7 +132,7 @@ public class FutureConnection {
     }
 
     void putBackMessage(Message msg) {
-        if( receiveFutures.isEmpty() ) {
+        if (receiveFutures.isEmpty()) {
             receivedFrames.addFirst(msg);
         } else {
             receiveFutures.removeFirst().onSuccess(msg);
@@ -140,6 +151,7 @@ public class FutureConnection {
     public Future<byte[]> connect() {
         final Promise<byte[]> future = new Promise<byte[]>();
         next.getDispatchQueue().execute(new Task() {
+            @Override
             public void run() {
                 next.connect(future);
             }
@@ -150,6 +162,7 @@ public class FutureConnection {
     public Future<Void> disconnect() {
         final Promise<Void> future = new Promise<Void>();
         next.getDispatchQueue().execute(new Task() {
+            @Override
             public void run() {
                 next.disconnect(false, future);
             }
@@ -160,6 +173,7 @@ public class FutureConnection {
     public Future<Void> kill() {
         final Promise<Void> future = new Promise<Void>();
         next.getDispatchQueue().execute(new Task() {
+            @Override
             public void run() {
                 next.kill(future);
             }
@@ -170,13 +184,14 @@ public class FutureConnection {
     public Future<byte[]> subscribe(final Topic[] topics) {
         final Promise<byte[]> future = new Promise<byte[]>();
         next.getDispatchQueue().execute(new Task() {
+            @Override
             public void run() {
                 next.subscribe(topics, future);
             }
         });
         return future;
     }
-    
+
     public Future<Void> unsubscribe(final String[] topics) {
         UTF8Buffer[] buffers = new UTF8Buffer[topics.length];
         for (int i = 0; i < buffers.length; i++) {
@@ -188,6 +203,7 @@ public class FutureConnection {
     public Future<Void> unsubscribe(final UTF8Buffer[] topics) {
         final Promise<Void> future = new Promise<Void>();
         next.getDispatchQueue().execute(new Task() {
+            @Override
             public void run() {
                 next.unsubscribe(topics, future);
             }
@@ -199,9 +215,10 @@ public class FutureConnection {
         return publish(utf8(topic), new Buffer(payload), qos, retain);
     }
 
-    public Future<byte[]> publish(final UTF8Buffer topic, final Buffer payload,  final QoS qos, final boolean retain) {
+    public Future<byte[]> publish(final UTF8Buffer topic, final Buffer payload, final QoS qos, final boolean retain) {
         final Promise<byte[]> future = new Promise<byte[]>();
         next.getDispatchQueue().execute(new Task() {
+            @Override
             public void run() {
                 next.publish(topic, payload, qos, retain, future);
             }
@@ -211,12 +228,13 @@ public class FutureConnection {
 
     public Future<Message> receive() {
         final Promise<Message> future = new Promise<Message>();
-        getDispatchQueue().execute(new Task(){
+        getDispatchQueue().execute(new Task() {
+            @Override
             public void run() {
-                if( next.failure()!=null ) {
+                if (next.failure() != null) {
                     future.onFailure(next.failure());
                 } else {
-                    if( receivedFrames.isEmpty() ) {
+                    if (receivedFrames.isEmpty()) {
                         receiveFutures.add(future);
                     } else {
                         future.onSuccess(receivedFrames.removeFirst());
@@ -236,13 +254,13 @@ public class FutureConnection {
         getDispatchQueue().assertExecuting();
         long prev = this.receiveBuffer;
         this.receiveBuffer = receiveBuffer;
-        long diff = prev-receiveBuffer;
+        long diff = prev - receiveBuffer;
 
         receiveBufferRemaining -= diff;
-        if( !receiveBufferFull && receiveBufferRemaining <=0 ) {
+        if (!receiveBufferFull && receiveBufferRemaining <= 0) {
             receiveBufferFull = true;
             suspend();
-        } else if( receiveBufferFull && receiveBufferRemaining >0 ) {
+        } else if (receiveBufferFull && receiveBufferRemaining > 0) {
             receiveBufferFull = false;
             resume();
         }

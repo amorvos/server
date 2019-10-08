@@ -8,16 +8,16 @@
 
 package io.moquette.imhandler;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.WFCMessage;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 @Handler(IMTopic.ModifyMyInfoTopic)
 public class ModifyMyInfoHandler extends IMHandler<WFCMessage.ModifyMyInfoRequest> {
     @Override
     public ErrorCode action(ByteBuf ackPayload, String clientID, String fromUser, boolean isAdmin, WFCMessage.ModifyMyInfoRequest request, Qos1PublishHandler.IMCallback callback) {
-            return m_messagesStore.modifyUserInfo(fromUser, request);
+        return m_messagesStore.modifyUserInfo(fromUser, request);
     }
 }

@@ -16,7 +16,11 @@
 
 package io.moquette.interception;
 
-import io.moquette.interception.messages.*;
+import io.moquette.interception.messages.InterceptAcknowledgedMessage;
+import io.moquette.interception.messages.InterceptConnectMessage;
+import io.moquette.interception.messages.InterceptConnectionLostMessage;
+import io.moquette.interception.messages.InterceptDisconnectMessage;
+import io.moquette.interception.messages.InterceptPublishMessage;
 import io.netty.handler.codec.mqtt.MqttMessage;
 
 /**
@@ -31,7 +35,7 @@ import io.netty.handler.codec.mqtt.MqttMessage;
 public interface InterceptHandler {
 
     Class<?>[] ALL_MESSAGE_TYPES = {InterceptConnectMessage.class, InterceptDisconnectMessage.class,
-            InterceptConnectionLostMessage.class, InterceptPublishMessage.class, InterceptAcknowledgedMessage.class};
+        InterceptConnectionLostMessage.class, InterceptPublishMessage.class, InterceptAcknowledgedMessage.class};
 
     /**
      * Returns the identifier of this intercept handler.

@@ -16,13 +16,6 @@
 
 package io.moquette.spi.impl;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.moquette.BrokerConstants;
 import io.moquette.interception.InterceptHandler;
 import io.moquette.server.ConnectionDescriptorStore;
@@ -35,6 +28,12 @@ import io.moquette.spi.impl.security.PermitAllAuthorizator;
 import io.moquette.spi.impl.security.TokenAuthenticator;
 import io.moquette.spi.security.IAuthenticator;
 import io.moquette.spi.security.IAuthorizator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * It's main responsibility is bootstrap the ProtocolProcessor.
@@ -57,24 +56,19 @@ public class ProtocolProcessorBootstrapper {
     /**
      * Initialize the processing part of the broker.
      *
-     * @param props
-     *            the properties carrier where some props like port end host could be loaded. For
-     *            the full list check of configurable properties check wildfirechat.conf file.
-     * @param embeddedObservers
-     *            a list of callbacks to be notified of certain events inside the broker. Could be
-     *            empty list of null.
-     * @param authenticator
-     *            an implementation of the authenticator to be used, if null load that specified in
-     *            config and fallback on the default one (permit all).
-     * @param authorizator
-     *            an implementation of the authorizator to be used, if null load that specified in
-     *            config and fallback on the default one (permit all).
-     * @param server
-     *            the server to init.
+     * @param props             the properties carrier where some props like port end host could be loaded. For
+     *                          the full list check of configurable properties check wildfirechat.conf file.
+     * @param embeddedObservers a list of callbacks to be notified of certain events inside the broker. Could be
+     *                          empty list of null.
+     * @param authenticator     an implementation of the authenticator to be used, if null load that specified in
+     *                          config and fallback on the default one (permit all).
+     * @param authorizator      an implementation of the authorizator to be used, if null load that specified in
+     *                          config and fallback on the default one (permit all).
+     * @param server            the server to init.
      * @return the processor created for the broker.
      */
     public ProtocolProcessor init(IConfig props, List<? extends InterceptHandler> embeddedObservers,
-            IAuthenticator authenticator, IAuthorizator authorizator, Server server, IStore store) {
+                                  IAuthenticator authenticator, IAuthorizator authorizator, Server server, IStore store) {
         IMessagesStore messagesStore;
         messagesStore = store.messagesStore();
         m_sessionsStore = store.sessionsStore();
@@ -99,7 +93,7 @@ public class ProtocolProcessorBootstrapper {
 
         LOG.info("Configuring MQTT authenticator...");
         authenticator = new TokenAuthenticator();
-        
+
 
         LOG.info("Configuring MQTT authorizator...");
         String authorizatorClassName = props.getProperty(BrokerConstants.AUTHORIZATOR_CLASS_NAME, "");
@@ -127,7 +121,7 @@ public class ProtocolProcessorBootstrapper {
             // check if constructor with constructor arg class parameter
             // exists
             LOG.info("Invoking constructor with {} argument. ClassName={}, interfaceName={}",
-                    constructorArgClass.getName(), className, intrface.getName());
+                constructorArgClass.getName(), className, intrface.getName());
             instance = this.getClass().getClassLoader()
                 .loadClass(className)
                 .asSubclass(intrface)
@@ -135,12 +129,12 @@ public class ProtocolProcessorBootstrapper {
                 .newInstance(props);
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
             LOG.warn("Unable to invoke constructor with {} argument. ClassName={}, interfaceName={}, cause={}, errorMessage={}",
-                    constructorArgClass.getName(), className, intrface.getName(), ex.getCause(), ex.getMessage());
+                constructorArgClass.getName(), className, intrface.getName(), ex.getCause(), ex.getMessage());
             return null;
         } catch (NoSuchMethodException | InvocationTargetException e) {
             try {
                 LOG.info("Invoking default constructor. ClassName={}, interfaceName={}",
-                        className, intrface.getName());
+                    className, intrface.getName());
                 // fallback to default constructor
                 instance = this.getClass().getClassLoader()
                     .loadClass(className)
@@ -148,7 +142,7 @@ public class ProtocolProcessorBootstrapper {
                     .newInstance();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
                 LOG.error("Unable to invoke default constructor. ClassName={}, interfaceName={}, cause={}, errorMessage={}",
-                        className, intrface.getName(), ex.getCause(), ex.getMessage());
+                    className, intrface.getName(), ex.getCause(), ex.getMessage());
                 return null;
             }
         }
@@ -161,10 +155,12 @@ public class ProtocolProcessorBootstrapper {
     }
 
     public void shutdown() {
-        if (storeShutdown != null)
+        if (storeShutdown != null) {
             storeShutdown.run();
-        if (m_processor != null)
+        }
+        if (m_processor != null) {
             m_processor.shutdown();
+        }
 //        if (m_interceptor != null)
 //            m_interceptor.stop();
     }

@@ -8,13 +8,13 @@
 
 package io.moquette.imhandler;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
 import com.hazelcast.util.StringUtil;
 import io.moquette.BrokerConstants;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 import win.liyufan.im.MessageShardingUtil;
 
@@ -26,6 +26,7 @@ import static cn.wildfirechat.proto.ProtoConstants.ContentType.Text;
 public class SendMessageHandler extends IMHandler<WFCMessage.Message> {
     private int mSensitiveType = 0;  //命中敏感词时，0 失败，1 吞掉， 2 敏感词替换成*。
     private String mForwardUrl = null;
+
     public SendMessageHandler() {
         super();
 
@@ -62,17 +63,17 @@ public class SendMessageHandler extends IMHandler<WFCMessage.Message> {
                 }
 
 
-                if (message.getConversation().getType() == ProtoConstants.ConversationType.ConversationType_Group ) {
+                if (message.getConversation().getType() == ProtoConstants.ConversationType.ConversationType_Group) {
                     errorCode = m_messagesStore.canSendMessageInGroup(fromUser, message.getConversation().getTarget());
                     if (errorCode != ErrorCode.ERROR_CODE_SUCCESS) {
                         return errorCode;
                     }
                 } else if (message.getConversation().getType() == ProtoConstants.ConversationType.ConversationType_ChatRoom) {
-                    if(!m_messagesStore.checkUserClientInChatroom(fromUser, clientID, message.getConversation().getTarget())) {
+                    if (!m_messagesStore.checkUserClientInChatroom(fromUser, clientID, message.getConversation().getTarget())) {
                         return ErrorCode.ERROR_CODE_NOT_IN_CHATROOM;
                     }
                 } else if (message.getConversation().getType() == ProtoConstants.ConversationType.ConversationType_Channel) {
-                    if(!m_messagesStore.checkUserInChannel(fromUser, message.getConversation().getTarget())) {
+                    if (!m_messagesStore.checkUserInChannel(fromUser, message.getConversation().getTarget())) {
                         return ErrorCode.ERROR_CODE_NOT_IN_CHANNEL;
                     }
                 }
@@ -93,16 +94,16 @@ public class SendMessageHandler extends IMHandler<WFCMessage.Message> {
                     m_messagesStore.storeSensitiveMessage(message);
                     if (mSensitiveType == 0) {
                         errorCode = ErrorCode.ERROR_CODE_SENSITIVE_MATCHED;
-                    } else if(mSensitiveType == 1) {
+                    } else if (mSensitiveType == 1) {
                         ignoreMsg = true;
-                    } else if(mSensitiveType == 2) {
+                    } else if (mSensitiveType == 2) {
                         String text = message.getContent().getSearchableContent();
                         for (String word : matched) {
                             text = text.replace(word, "***");
                         }
 
                         message = message.toBuilder().setContent(message.getContent().toBuilder().setSearchableContent(text).build()).build();
-                    } else if(mSensitiveType == 3) {
+                    } else if (mSensitiveType == 3) {
 
                     }
                 }

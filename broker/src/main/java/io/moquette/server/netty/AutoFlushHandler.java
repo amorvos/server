@@ -21,6 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.EventExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -139,10 +140,8 @@ public class AutoFlushHandler extends ChannelDuplexHandler {
     /**
      * Is called when the write timeout expire.
      *
-     * @param ctx
-     *            the channel context.
-     * @throws Exception
-     *             in case of any IO error.
+     * @param ctx the channel context.
+     * @throws Exception in case of any IO error.
      */
     protected void channelIdle(ChannelHandlerContext ctx/* , IdleStateEvent evt */) throws Exception {
         // ctx.fireUserEventTriggered(evt);

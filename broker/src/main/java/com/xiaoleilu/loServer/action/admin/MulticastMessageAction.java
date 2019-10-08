@@ -11,12 +11,9 @@ package com.xiaoleilu.loServer.action.admin;
 
 import cn.wildfirechat.common.APIPath;
 import cn.wildfirechat.common.ErrorCode;
-import cn.wildfirechat.pojos.BroadMessageData;
-import cn.wildfirechat.pojos.BroadMessageResult;
 import cn.wildfirechat.pojos.MultiMessageResult;
 import cn.wildfirechat.pojos.MulticastMessageData;
 import com.google.gson.Gson;
-import com.hazelcast.util.StringUtil;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
@@ -34,7 +31,7 @@ import java.util.concurrent.Executor;
 
 @Route(APIPath.Msg_Multicast)
 @HttpMethod("POST")
-public class MulticastMessageAction extends AdminAction {
+public class MulticastMessageAction extends AbstractAdminAction {
 
     @Override
     public boolean isTransactionAction() {

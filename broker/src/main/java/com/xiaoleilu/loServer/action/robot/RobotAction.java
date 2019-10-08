@@ -8,6 +8,7 @@
 
 package com.xiaoleilu.loServer.action.robot;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
@@ -20,7 +21,6 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
 import org.apache.commons.codec.digest.DigestUtils;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.RateLimiter;
 
 import java.io.UnsupportedEncodingException;
@@ -77,6 +77,7 @@ abstract public class RobotAction extends Action {
         response.send();
     }
 
+    @Override
     protected <T> T getRequestBody(HttpRequest request, Class<T> cls) {
         if (request instanceof FullHttpRequest) {
             FullHttpRequest fullHttpRequest = (FullHttpRequest) request;

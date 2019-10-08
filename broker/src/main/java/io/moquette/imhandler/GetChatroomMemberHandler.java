@@ -8,10 +8,10 @@
 
 package io.moquette.imhandler;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.WFCMessage;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 @Handler(IMTopic.GetChatroomMemberTopic)
@@ -19,13 +19,13 @@ public class GetChatroomMemberHandler extends IMHandler<WFCMessage.GetChatroomMe
     @Override
     public ErrorCode action(ByteBuf ackPayload, String clientID, String fromUser, boolean isAdmin, WFCMessage.GetChatroomMemberInfoRequest request, Qos1PublishHandler.IMCallback callback) {
         ErrorCode errorCode = ErrorCode.ERROR_CODE_SUCCESS;
-            WFCMessage.ChatroomMemberInfo info = m_messagesStore.getChatroomMemberInfo(request.getChatroomId(), request.getMaxCount());
-            if (info != null) {
-                byte[] data = info.toByteArray();
-                ackPayload.ensureWritable(data.length).writeBytes(data);
-            } else {
-                errorCode = ErrorCode.ERROR_CODE_NOT_EXIST;
-            }
-            return errorCode;
+        WFCMessage.ChatroomMemberInfo info = m_messagesStore.getChatroomMemberInfo(request.getChatroomId(), request.getMaxCount());
+        if (info != null) {
+            byte[] data = info.toByteArray();
+            ackPayload.ensureWritable(data.length).writeBytes(data);
+        } else {
+            errorCode = ErrorCode.ERROR_CODE_NOT_EXIST;
+        }
+        return errorCode;
     }
 }

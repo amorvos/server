@@ -16,13 +16,13 @@
 
 package io.moquette.server.netty;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Sharable
 class MoquetteIdleTimeoutHandler extends ChannelDuplexHandler {
@@ -42,9 +42,9 @@ class MoquetteIdleTimeoutHandler extends ChannelDuplexHandler {
         } else {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(
-                        "Firing Netty event. MqttClientId = {}, eventClass = {}.",
-                        NettyUtils.clientID(ctx.channel()),
-                        evt.getClass().getName());
+                    "Firing Netty event. MqttClientId = {}, eventClass = {}.",
+                    NettyUtils.clientID(ctx.channel()),
+                    evt.getClass().getName());
             }
             super.userEventTriggered(ctx, evt);
         }

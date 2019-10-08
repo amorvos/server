@@ -62,7 +62,7 @@ public enum MqttVersion {
 
     public static MqttVersion fromProtocolLevel(int protocolLevel) {
         for (MqttVersion mv : values()) {
-            if (mv.level == (byte )protocolLevel) {
+            if (mv.level == (byte) protocolLevel) {
                 return mv;
             }
         }

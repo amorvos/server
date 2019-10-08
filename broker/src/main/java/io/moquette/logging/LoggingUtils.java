@@ -16,9 +16,10 @@
 
 package io.moquette.logging;
 
+import io.moquette.interception.InterceptHandler;
+
 import java.util.ArrayList;
 import java.util.Collection;
-import io.moquette.interception.InterceptHandler;
 
 public final class LoggingUtils {
 

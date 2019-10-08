@@ -69,7 +69,7 @@ public class MessageMetricsHandler extends ChannelDuplexHandler {
             userId = "";
         }
 
-        LOG.info("channel<{}> closing after read {} messages and wrote {} messages", userId,  metrics.messagesRead(), metrics.messagesWrote());
+        LOG.info("channel<{}> closing after read {} messages and wrote {} messages", userId, metrics.messagesRead(), metrics.messagesWrote());
         m_collector.sumReadMessages(metrics.messagesRead());
         m_collector.sumWroteMessages(metrics.messagesWrote());
         super.close(ctx, promise);

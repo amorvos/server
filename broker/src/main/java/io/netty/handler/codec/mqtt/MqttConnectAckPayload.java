@@ -26,7 +26,7 @@ public final class MqttConnectAckPayload {
     private final byte[] data;
 
     public MqttConnectAckPayload(
-            byte[] data) {
+        byte[] data) {
         this.data = data;
     }
 

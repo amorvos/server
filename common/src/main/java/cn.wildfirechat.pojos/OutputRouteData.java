@@ -10,7 +10,8 @@ package cn.wildfirechat.pojos;
 
 import java.util.List;
 
-public class OutputRouteData { ;
+public class OutputRouteData {
+    ;
     private List<String> serverIPs;
     private int longPort;
     private int shortPort;

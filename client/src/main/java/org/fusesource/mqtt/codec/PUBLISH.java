@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,11 +18,11 @@
 
 package org.fusesource.mqtt.codec;
 
-import org.fusesource.mqtt.client.QoS;
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.hawtbuf.DataByteArrayInputStream;
 import org.fusesource.hawtbuf.DataByteArrayOutputStream;
 import org.fusesource.hawtbuf.UTF8Buffer;
+import org.fusesource.mqtt.client.QoS;
 
 import java.io.IOException;
 import java.net.ProtocolException;
@@ -45,40 +45,43 @@ public class PUBLISH extends MessageSupport.HeaderBase implements MessageSupport
         qos(QoS.AT_LEAST_ONCE);
     }
 
+    @Override
     public byte messageType() {
         return TYPE;
     }
 
+    @Override
     public PUBLISH decode(MQTTFrame frame) throws ProtocolException {
-        assert(frame.buffers.length == 1);
+        assert (frame.buffers.length == 1);
         header(frame.header());
 
         DataByteArrayInputStream is = new DataByteArrayInputStream(frame.buffers[0]);
         topicName = MessageSupport.readUTF(is);
-        
+
         QoS qos = qos();
-        if(qos != QoS.AT_MOST_ONCE) {
+        if (qos != QoS.AT_MOST_ONCE) {
             messageId = is.readShort();
         }
         payload = is.readBuffer(is.available());
-        if( payload == null ) {
+        if (payload == null) {
             payload = new Buffer(0);
         }
         return this;
     }
-    
+
+    @Override
     public MQTTFrame encode() {
         try {
             DataByteArrayOutputStream os = new DataByteArrayOutputStream();
             MessageSupport.writeUTF(os, topicName);
             QoS qos = qos();
-            if(qos != QoS.AT_MOST_ONCE) {
+            if (qos != QoS.AT_MOST_ONCE) {
                 os.writeShort(messageId);
             }
             MQTTFrame frame = new MQTTFrame();
             frame.header(header());
             frame.commandType(TYPE);
-            if(payload!=null && payload.length!=0) {
+            if (payload != null && payload.length != 0) {
                 os.write(payload);
             }
             frame.buffer(os.toBuffer());
@@ -118,10 +121,12 @@ public class PUBLISH extends MessageSupport.HeaderBase implements MessageSupport
         return (PUBLISH) super.retain(retain);
     }
 
+    @Override
     public short messageId() {
         return messageId;
     }
 
+    @Override
     public PUBLISH messageId(short messageId) {
         this.messageId = messageId;
         return this;
@@ -148,12 +153,12 @@ public class PUBLISH extends MessageSupport.HeaderBase implements MessageSupport
     @Override
     public String toString() {
         return "PUBLISH{" +
-                "dup=" + dup() +
-                ", qos=" + qos() +
-                ", retain=" + retain() +
-                ", messageId=" + messageId +
-                ", topicName=" + topicName +
-                ", payload=" + payload +
-                '}';
+            "dup=" + dup() +
+            ", qos=" + qos() +
+            ", retain=" + retain() +
+            ", messageId=" + messageId +
+            ", topicName=" + topicName +
+            ", payload=" + payload +
+            '}';
     }
 }

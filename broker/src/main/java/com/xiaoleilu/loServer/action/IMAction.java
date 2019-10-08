@@ -9,14 +9,15 @@
 
 package com.xiaoleilu.loServer.action;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.WFCMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import io.moquette.persistence.RPCCenter;
 import io.moquette.persistence.MemorySessionStore;
+import io.moquette.persistence.RPCCenter;
 import io.moquette.persistence.TargetEntry;
 import io.moquette.spi.impl.Utils;
 import io.moquette.spi.impl.security.AES;
@@ -25,7 +26,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import cn.wildfirechat.common.ErrorCode;
 
 import java.util.Base64;
 import java.util.concurrent.Executor;
@@ -38,7 +38,7 @@ public class IMAction extends Action {
     public boolean action(Request request, Response response) {
         if (request.getNettyRequest() instanceof FullHttpRequest) {
 
-            FullHttpRequest fullHttpRequest = (FullHttpRequest)request.getNettyRequest();
+            FullHttpRequest fullHttpRequest = (FullHttpRequest) request.getNettyRequest();
             byte[] bytes = Utils.readBytesAndRewind(fullHttpRequest.content());
 
             String str = new String(bytes);
@@ -114,7 +114,7 @@ public class IMAction extends Action {
 
     private void sendResponse(Response response, ErrorCode errorCode, byte[] contents) {
         response.setStatus(HttpResponseStatus.OK);
-        if(contents == null) {
+        if (contents == null) {
             ByteBuf ackPayload = Unpooled.buffer();
             ackPayload.ensureWritable(1).writeByte(errorCode.getCode());
             response.setContent(ackPayload);

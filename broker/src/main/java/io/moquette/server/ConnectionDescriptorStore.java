@@ -16,6 +16,7 @@
 
 package io.moquette.server;
 
+import cn.wildfirechat.common.ErrorCode;
 import io.moquette.connections.IConnectionsManager;
 import io.moquette.connections.MqttConnectionMetrics;
 import io.moquette.connections.MqttSession;
@@ -27,7 +28,6 @@ import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cn.wildfirechat.common.ErrorCode;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -26,7 +26,11 @@ import win.liyufan.im.Utility;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Load user credentials from a SQL database. sql driver must be provided at runtime
@@ -40,23 +44,19 @@ public class DBAuthenticator implements IAuthenticator {
 
     public DBAuthenticator(IConfig conf) {
         this(
-                conf.getProperty(BrokerConstants.DB_AUTHENTICATOR_DRIVER, ""),
-                conf.getProperty(BrokerConstants.DB_AUTHENTICATOR_URL, ""),
-                conf.getProperty(BrokerConstants.DB_AUTHENTICATOR_QUERY, ""),
-                conf.getProperty(BrokerConstants.DB_AUTHENTICATOR_DIGEST, ""));
+            conf.getProperty(BrokerConstants.DB_AUTHENTICATOR_DRIVER, ""),
+            conf.getProperty(BrokerConstants.DB_AUTHENTICATOR_URL, ""),
+            conf.getProperty(BrokerConstants.DB_AUTHENTICATOR_QUERY, ""),
+            conf.getProperty(BrokerConstants.DB_AUTHENTICATOR_DIGEST, ""));
     }
 
     /**
      * provide authenticator from SQL database
      *
-     * @param driver
-     *            : jdbc driver class like : "org.postgresql.Driver"
-     * @param jdbcUrl
-     *            : jdbc url like : "jdbc:postgresql://host:port/dbname"
-     * @param sqlQuery
-     *            : sql query like : "SELECT PASSWORD FROM USER WHERE LOGIN=?"
-     * @param digestMethod
-     *            : password encoding algorithm : "MD5", "SHA-1", "SHA-256"
+     * @param driver       : jdbc driver class like : "org.postgresql.Driver"
+     * @param jdbcUrl      : jdbc url like : "jdbc:postgresql://host:port/dbname"
+     * @param sqlQuery     : sql query like : "SELECT PASSWORD FROM USER WHERE LOGIN=?"
+     * @param digestMethod : password encoding algorithm : "MD5", "SHA-1", "SHA-256"
      */
     public DBAuthenticator(String driver, String jdbcUrl, String sqlQuery, String digestMethod) {
 

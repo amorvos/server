@@ -8,6 +8,7 @@
 
 package com.xiaoleilu.loServer.action;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.WFCMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
@@ -26,7 +27,6 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cn.wildfirechat.common.ErrorCode;
 
 import java.util.Base64;
 import java.util.concurrent.Executor;

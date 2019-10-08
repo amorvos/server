@@ -16,17 +16,13 @@
 
 package io.moquette.spi.impl;
 
-import cn.wildfirechat.proto.WFCMessage;
 import cn.wildfirechat.push.PushMessage;
 import cn.wildfirechat.push.PushServer;
 import io.moquette.server.ConnectionDescriptorStore;
 import io.moquette.spi.ClientSession;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
-import io.netty.handler.codec.mqtt.MqttQoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static io.moquette.spi.impl.ProtocolProcessor.asStoredMessage;
-import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
 
 class PersistentQueueMessageSender {
 
@@ -56,7 +52,7 @@ class PersistentQueueMessageSender {
 
         boolean messageDelivered = connectionDescriptorStore.sendMessage(pubMessage, messageId, clientId, null);
 
-        if(!messageDelivered) {
+        if (!messageDelivered) {
             LOG.warn("PUBLISH message could not be delivered.  MessageId={}, CId={}, topic={}", messageId, clientId, topicName);
         }
 

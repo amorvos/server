@@ -11,8 +11,6 @@ package com.xiaoleilu.loServer.action.admin;
 import cn.wildfirechat.common.APIPath;
 import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.InputGetGroup;
-import cn.wildfirechat.pojos.InputGetUserInfo;
-import cn.wildfirechat.pojos.InputOutputUserInfo;
 import cn.wildfirechat.pojos.PojoGroupInfo;
 import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
@@ -27,7 +25,7 @@ import io.netty.util.internal.StringUtil;
 
 @Route(APIPath.Group_Get_Info)
 @HttpMethod("POST")
-public class GetGroupInfoAction extends AdminAction {
+public class GetGroupInfoAction extends AbstractAdminAction {
 
     @Override
     public boolean isTransactionAction() {

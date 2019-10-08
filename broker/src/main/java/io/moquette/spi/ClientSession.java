@@ -16,13 +16,10 @@
 
 package io.moquette.spi;
 
-import cn.wildfirechat.proto.WFCMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.Queue;
-import java.util.Set;
 
 /**
  * Model a Session like describe on page 25 of MQTT 3.1.1 specification:
@@ -46,7 +43,7 @@ public class ClientSession {
          * Save the binding messageID, clientID - message
          *
          * @param messageID the packet ID used in transmission
-         * @param msg the message to put in flight zone
+         * @param msg       the message to put in flight zone
          */
         void waitingAck(int messageID, IMessagesStore.StoredMessage msg) {
             if (LOG.isTraceEnabled()) {
@@ -56,8 +53,9 @@ public class ClientSession {
         }
 
         IMessagesStore.StoredMessage acknowledged(int messageID) {
-            if (LOG.isTraceEnabled())
+            if (LOG.isTraceEnabled()) {
                 LOG.trace("Acknowledging inflight, clientID <{}> messageID {}", ClientSession.this.clientID, messageID);
+            }
             return m_sessionsStore.inFlightAck(ClientSession.this.clientID, messageID);
         }
     }
@@ -134,7 +132,7 @@ public class ClientSession {
      * Mark the message identified by guid as publish in flight.
      *
      * @return the packetID for the message in flight.
-     * */
+     */
     public int inFlightAckWaiting(IMessagesStore.StoredMessage msg) {
         LOG.debug("Adding message ot inflight zone. ClientId={}", clientID);
         int messageId = ClientSession.this.nextPacketId();
@@ -149,8 +147,7 @@ public class ClientSession {
     /**
      * Enqueue a message to be sent to the client.
      *
-     * @param message
-     *            the message to enqueue.
+     * @param message the message to enqueue.
      */
     public void enqueue(IMessagesStore.StoredMessage message) {
         this.m_sessionsStore.queue(this.clientID).add(message);

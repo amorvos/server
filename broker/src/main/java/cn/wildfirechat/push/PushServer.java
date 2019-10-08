@@ -9,11 +9,9 @@
 package cn.wildfirechat.push;
 
 import cn.wildfirechat.proto.ProtoConstants;
-import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
 import io.moquette.persistence.MemorySessionStore;
 import io.moquette.server.config.IConfig;
-import io.moquette.spi.ClientSession;
 import io.moquette.spi.ISessionsStore;
 import io.netty.util.internal.StringUtil;
 import org.slf4j.Logger;
@@ -38,10 +36,10 @@ public class PushServer {
 
     private static PushServer INSTANCE = new PushServer();
     private ISessionsStore sessionsStore;
-    private static ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*5);
+    private static ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 5);
 
     private String androidPushServerUrl;
-    private String iOSPushServerUrl;
+    private String iosPushServerUrl;
 
     private PushServer() {
     }
@@ -53,22 +51,22 @@ public class PushServer {
     public void init(IConfig config, ISessionsStore sessionsStore) {
         this.sessionsStore = sessionsStore;
         this.androidPushServerUrl = config.getProperty(PUSH_ANDROID_SERVER_ADDRESS);
-        this.iOSPushServerUrl = config.getProperty(PUSH_IOS_SERVER_ADDRESS);
+        this.iosPushServerUrl = config.getProperty(PUSH_IOS_SERVER_ADDRESS);
     }
 
     public void pushMessage(PushMessage pushMessage, String deviceId, String pushContent) {
-        LOG.info("try to delivery push diviceId = {}, pushContent", deviceId, pushContent);
-        executorService.execute(() ->{
-                try {
-                    pushMessageInternel(pushMessage, deviceId, pushContent);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Utility.printExecption(LOG, e);
-                }
-            });
+        LOG.info("try to delivery push deviceId = {}, pushContent = {}", deviceId, pushContent);
+        executorService.execute(() -> {
+            try {
+                pushMessageInternal(pushMessage, deviceId, pushContent);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Utility.printExecption(LOG, e);
+            }
+        });
     }
 
-    private void pushMessageInternel(PushMessage pushMessage, String deviceId, String pushContent) {
+    private void pushMessageInternal(PushMessage pushMessage, String deviceId, String pushContent) {
         if (pushMessage.pushMessageType == PushMessageType.PUSH_MESSAGE_TYPE_NORMAL && StringUtil.isNullOrEmpty(pushContent)) {
             LOG.info("push content empty, deviceId {}", deviceId);
             return;
@@ -92,7 +90,7 @@ public class PushServer {
         if (session.getPlatform() == ProtoConstants.Platform.Platform_iOS || session.getPlatform() == ProtoConstants.Platform.Platform_Android) {
             String url = androidPushServerUrl;
             if (session.getPlatform() == ProtoConstants.Platform.Platform_iOS) {
-                url = iOSPushServerUrl;
+                url = iosPushServerUrl;
                 pushMessage.voipDeviceToken = session.getVoipDeviceToken();
             }
             HttpUtils.httpJsonPost(url, new Gson().toJson(pushMessage, pushMessage.getClass()));

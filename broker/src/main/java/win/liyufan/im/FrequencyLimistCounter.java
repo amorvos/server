@@ -1,10 +1,7 @@
 package win.liyufan.im;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -24,7 +21,7 @@ public class FrequencyLimistCounter {
 
     private long lastFullScanTime = System.currentTimeMillis();
     //2个小时全部扫描一次
-    private static final long fullScanDuration = 2*60*60*1000;
+    private static final long fullScanDuration = 2 * 60 * 60 * 1000;
 
     public FrequencyLimistCounter(int limitTimeSec, int limitCount) {
         this.CACHE_HOLD_TIME = limitTimeSec * 1000;
@@ -36,6 +33,7 @@ public class FrequencyLimistCounter {
 
     /**
      * 增加对象计数并返回是否超频
+     *
      * @param cacheName
      * @return ture 超频; false 不超频
      */
@@ -73,7 +71,7 @@ public class FrequencyLimistCounter {
         if (System.currentTimeMillis() - lastFullScanTime > fullScanDuration) {
             lastFullScanTime = System.currentTimeMillis();
             for (Map.Entry<String, Long> entry : CACHE_TIME_MAP.entrySet()
-                 ) {
+            ) {
                 if (entry.getValue() < lastFullScanTime) {
                     CACHE_MAP.remove(entry.getKey());
                     CACHE_TIME_MAP.remove(entry.getKey());
@@ -81,12 +79,13 @@ public class FrequencyLimistCounter {
             }
         }
     }
+
     public static void main(String[] args) {
         FrequencyLimistCounter counter = new FrequencyLimistCounter(5, 100);
         String name = "test";
 
         for (int i = 0; i < 50; i++) {
-            if(counter.increaseAndCheck(name)) {
+            if (counter.increaseAndCheck(name)) {
                 System.out.println("test failure 1");
                 System.exit(-1);
             }
@@ -100,38 +99,38 @@ public class FrequencyLimistCounter {
 
 
         for (int i = 0; i < 49; i++) {
-            if(counter.increaseAndCheck(name)) {
+            if (counter.increaseAndCheck(name)) {
                 System.out.println("test failure 2");
                 System.exit(-1);
             }
         }
 
-        if(!counter.increaseAndCheck(name)) {
+        if (!counter.increaseAndCheck(name)) {
             System.out.println("test failure 3");
             System.exit(-1);
         }
 
         try {
-            Thread.sleep(5*1000);
+            Thread.sleep(5 * 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         for (int i = 0; i < 99; i++) {
-            if(counter.increaseAndCheck(name)) {
+            if (counter.increaseAndCheck(name)) {
                 System.out.println("test failure 4");
                 System.exit(-1);
             }
         }
 
         try {
-            Thread.sleep(5*1000);
+            Thread.sleep(5 * 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         for (int i = 0; i < 99; i++) {
-            if(counter.increaseAndCheck(name)) {
+            if (counter.increaseAndCheck(name)) {
                 System.out.println("test failure 5");
                 System.exit(-1);
             }

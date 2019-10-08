@@ -8,7 +8,6 @@
 
 package cn.wildfirechat.pojos;
 
-import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
 import io.netty.util.internal.StringUtil;
 
@@ -45,7 +44,7 @@ public class MulticastMessageData {
     }
 
     public static boolean isValide(MulticastMessageData sendMessageData) {
-        if(sendMessageData == null ||
+        if (sendMessageData == null ||
             StringUtil.isNullOrEmpty(sendMessageData.getSender()) ||
             sendMessageData.getPayload() == null) {
             return false;

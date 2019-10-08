@@ -8,12 +8,12 @@
 
 package io.moquette.imhandler;
 
-import cn.wildfirechat.proto.WFCMessage;
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.GroupNotificationBinaryContent;
+import cn.wildfirechat.proto.WFCMessage;
 import com.hazelcast.util.StringUtil;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 @Handler(value = IMTopic.CreateGroupTopic)
@@ -29,7 +29,7 @@ public class CreateGroupHandler extends GroupHandler<WFCMessage.CreateGroupReque
         }
         WFCMessage.GroupInfo groupInfo = m_messagesStore.createGroup(fromUser, request.getGroup().getGroupInfo(), request.getGroup().getMembersList());
         if (groupInfo != null) {
-            if(request.hasNotifyContent() && request.getNotifyContent().getType() > 0) {
+            if (request.hasNotifyContent() && request.getNotifyContent().getType() > 0) {
                 sendGroupNotification(fromUser, groupInfo.getTargetId(), request.getToLineList(), request.getNotifyContent());
             } else {
                 WFCMessage.MessageContent content = new GroupNotificationBinaryContent(groupInfo.getTargetId(), fromUser, groupInfo.getName(), "").getCreateGroupNotifyContent();

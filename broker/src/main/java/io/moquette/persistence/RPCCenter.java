@@ -8,12 +8,16 @@
 
 package io.moquette.persistence;
 
-import io.moquette.persistence.remote.*;
+import cn.wildfirechat.common.ErrorCode;
+import io.moquette.persistence.remote.RequestInfo;
 import io.moquette.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cn.wildfirechat.common.ErrorCode;
-import java.util.concurrent.*;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class RPCCenter {
@@ -32,8 +36,11 @@ public class RPCCenter {
 
     public interface Callback {
         void onSuccess(byte[] response);
+
         void onError(ErrorCode errorCode);
+
         void onTimeout();
+
         Executor getResponseExecutor();
     }
 
@@ -46,15 +53,23 @@ public class RPCCenter {
         return instance;
     }
 
-    protected RPCCenter() {}
+    protected RPCCenter() {
+    }
 
-    public void sendRequest(String fromUser, String clientId, String request, byte[] message, String target, TargetEntry.Type type, Callback callback, boolean isAdmin) {
+    public void sendRequest(String fromUser,
+                            String clientId,
+                            String request,
+                            byte[] message,
+                            String target,
+                            TargetEntry.Type type,
+                            Callback callback,
+                            boolean isAdmin) {
         int requestId = 0;
 
         if (callback != null) {
             requestId = aiRequestId.incrementAndGet();
             if (requestId == Integer.MAX_VALUE) {
-                if(!aiRequestId.compareAndSet(Integer.MAX_VALUE, 1)) {
+                if (!aiRequestId.compareAndSet(Integer.MAX_VALUE, 1)) {
                     requestId = aiRequestId.incrementAndGet();
                 }
             }
@@ -69,7 +84,7 @@ public class RPCCenter {
         if (requestId > 0) {
             RequestInfo info = requestMap.remove(requestId);
             LOG.debug("receive async reponse requestId {}, errorCode {}", requestId, errorCode);
-            if(info != null) {
+            if (info != null) {
                 info.future.cancel(true);
                 if (info.callback != null) {
                     info.callback.getResponseExecutor().execute(() -> {

@@ -1,14 +1,25 @@
 package com.xiaoleilu.loServer.handler;
 
-import io.netty.util.internal.StringUtil;
 import io.moquette.server.config.MediaServerConfig;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.multipart.*;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpContent;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.LastHttpContent;
+import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
+import io.netty.handler.codec.http.multipart.FileUpload;
+import io.netty.handler.codec.http.multipart.HttpDataFactory;
+import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
+import io.netty.handler.codec.http.multipart.InterfaceHttpData;
+import io.netty.util.internal.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +28,11 @@ import java.io.RandomAccessFile;
 import java.util.UUID;
 
 import static com.xiaoleilu.loServer.handler.HttpResponseHelper.getFileExt;
-import static io.netty.handler.codec.http.HttpHeaders.Names.*;
 import static io.netty.handler.codec.http.HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS;
+import static io.netty.handler.codec.http.HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS;
+import static io.netty.handler.codec.http.HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
+import static io.netty.handler.codec.http.HttpHeaders.Names.TRANSFER_ENCODING;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class HttpFileServerHandler extends ChannelInboundHandlerAdapter {
@@ -107,7 +121,7 @@ public class HttpFileServerHandler extends ChannelInboundHandlerAdapter {
                         logger.warn("invalid X-File-Total-Size value!");
                     }
                 }
-                
+
                 readHttpDataChunkByChunk(ctx, decoder, requestId, HttpHeaders.isKeepAlive(request));
 
                 if (chunk instanceof LastHttpContent) {
@@ -169,7 +183,6 @@ public class HttpFileServerHandler extends ChannelInboundHandlerAdapter {
                 }
 
 
-
                 String remoteFileExt = "";
                 if (remoteFileName.lastIndexOf(".") == -1) {
                     remoteFileExt = "octetstream";
@@ -217,11 +230,13 @@ public class HttpFileServerHandler extends ChannelInboundHandlerAdapter {
                         }
                     } catch (Exception e) {
                         logger.error("save thunckData error!", e);
-                        if (fileUpload != null)
+                        if (fileUpload != null) {
                             fileUpload.release();
+                        }
 
-                        if (byteBuf != null)
+                        if (byteBuf != null) {
                             byteBuf.release();
+                        }
 
                         HttpResponseHelper.sendResponse(requestId, ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);
                         isError = true;
@@ -249,8 +264,9 @@ public class HttpFileServerHandler extends ChannelInboundHandlerAdapter {
             raf.write(data);
         } finally {
             try {
-                if (raf != null)
+                if (raf != null) {
                     raf.close();
+                }
             } catch (Exception e) {
                 logger.warn("release error!", e);
             }
@@ -381,8 +397,9 @@ public class HttpFileServerHandler extends ChannelInboundHandlerAdapter {
             FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.NO_CONTENT);
             response.headers().set(CONTENT_TYPE, HttpHeaders.Values.APPLICATION_JSON);
             response.headers().set(TRANSFER_ENCODING, "chunked");
-            if (isKeepAlive)
+            if (isKeepAlive) {
                 response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+            }
             response.headers().set(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
             response.headers().set(ACCESS_CONTROL_ALLOW_METHODS, "GET, POST, DELETE, OPTIONS");
             response.headers().set(ACCESS_CONTROL_ALLOW_HEADERS, "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization");
@@ -404,13 +421,15 @@ public class HttpFileServerHandler extends ChannelInboundHandlerAdapter {
      */
     private void releaseRequest(FullHttpRequest request, HttpPostRequestDecoder decoder) {
         try {
-            if (request != null)
+            if (request != null) {
                 request.release();
+            }
 
             request = null;
 
-            if (decoder != null)
+            if (decoder != null) {
                 decoder.destroy();
+            }
 
             decoder = null;
         } catch (Exception e) {

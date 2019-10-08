@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,9 +18,9 @@
 
 package org.fusesource.mqtt.codec;
 
-import org.fusesource.mqtt.client.QoS;
 import org.fusesource.hawtbuf.DataByteArrayInputStream;
 import org.fusesource.hawtbuf.DataByteArrayOutputStream;
+import org.fusesource.mqtt.client.QoS;
 
 import java.io.IOException;
 import java.net.ProtocolException;
@@ -37,22 +37,25 @@ public class PUBREL extends MessageSupport.HeaderBase implements MessageSupport.
 
     private short messageId;
 
+    @Override
     public byte messageType() {
         return TYPE;
     }
-    
+
     public PUBREL() {
         qos(QoS.AT_LEAST_ONCE);
     }
 
+    @Override
     public PUBREL decode(MQTTFrame frame) throws ProtocolException {
-        assert(frame.buffers.length == 1);
+        assert (frame.buffers.length == 1);
         header(frame.header());
         DataByteArrayInputStream is = new DataByteArrayInputStream(frame.buffers[0]);
         messageId = is.readShort();
         return this;
     }
-    
+
+    @Override
     public MQTTFrame encode() {
         try {
             DataByteArrayOutputStream os = new DataByteArrayOutputStream(2);
@@ -83,10 +86,12 @@ public class PUBREL extends MessageSupport.HeaderBase implements MessageSupport.
         return super.qos();
     }
 
+    @Override
     public short messageId() {
         return messageId;
     }
 
+    @Override
     public PUBREL messageId(short messageId) {
         this.messageId = messageId;
         return this;
@@ -95,9 +100,9 @@ public class PUBREL extends MessageSupport.HeaderBase implements MessageSupport.
     @Override
     public String toString() {
         return "PUBREL{" +
-                "dup=" + dup() +
-                ", qos=" + qos() +
-                ", messageId=" + messageId +
-                '}';
+            "dup=" + dup() +
+            ", qos=" + qos() +
+            ", messageId=" + messageId +
+            '}';
     }
 }

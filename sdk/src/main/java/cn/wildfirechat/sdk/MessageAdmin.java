@@ -1,7 +1,15 @@
 package cn.wildfirechat.sdk;
 
 import cn.wildfirechat.common.APIPath;
-import cn.wildfirechat.pojos.*;
+import cn.wildfirechat.pojos.BroadMessageData;
+import cn.wildfirechat.pojos.BroadMessageResult;
+import cn.wildfirechat.pojos.Conversation;
+import cn.wildfirechat.pojos.MessagePayload;
+import cn.wildfirechat.pojos.MultiMessageResult;
+import cn.wildfirechat.pojos.MulticastMessageData;
+import cn.wildfirechat.pojos.RecallMessageData;
+import cn.wildfirechat.pojos.SendMessageData;
+import cn.wildfirechat.pojos.SendMessageResult;
 import cn.wildfirechat.sdk.model.IMResult;
 import cn.wildfirechat.sdk.utilities.AdminHttpUtils;
 

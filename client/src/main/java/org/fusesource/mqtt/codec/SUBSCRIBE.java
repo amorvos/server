@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,10 +18,10 @@
 
 package org.fusesource.mqtt.codec;
 
-import org.fusesource.mqtt.client.QoS;
-import org.fusesource.mqtt.client.Topic;
 import org.fusesource.hawtbuf.DataByteArrayInputStream;
 import org.fusesource.hawtbuf.DataByteArrayOutputStream;
+import org.fusesource.mqtt.client.QoS;
+import org.fusesource.mqtt.client.Topic;
 
 import java.io.IOException;
 import java.net.ProtocolException;
@@ -46,36 +46,39 @@ public class SUBSCRIBE extends MessageSupport.HeaderBase implements MessageSuppo
         qos(QoS.AT_LEAST_ONCE);
     }
 
+    @Override
     public byte messageType() {
         return TYPE;
     }
 
+    @Override
     public SUBSCRIBE decode(MQTTFrame frame) throws ProtocolException {
-        assert(frame.buffers.length == 1);
+        assert (frame.buffers.length == 1);
         header(frame.header());
 
         DataByteArrayInputStream is = new DataByteArrayInputStream(frame.buffers[0]);
         QoS qos = qos();
-        if(qos != QoS.AT_MOST_ONCE) {
+        if (qos != QoS.AT_MOST_ONCE) {
             messageId = is.readShort();
         }
         ArrayList<Topic> list = new ArrayList<Topic>();
-        while(is.available() > 0) {
+        while (is.available() > 0) {
             Topic topic = new Topic(MessageSupport.readUTF(is), QoS.values()[is.readByte()]);
             list.add(topic);
         }
         topics = list.toArray(new Topic[list.size()]);
         return this;
     }
-    
+
+    @Override
     public MQTTFrame encode() {
         try {
             DataByteArrayOutputStream os = new DataByteArrayOutputStream();
             QoS qos = qos();
-            if(qos != QoS.AT_MOST_ONCE) {
+            if (qos != QoS.AT_MOST_ONCE) {
                 os.writeShort(messageId);
             }
-            for(Topic topic: topics) {
+            for (Topic topic : topics) {
                 MessageSupport.writeUTF(os, topic.name());
                 os.writeByte(topic.qos().ordinal());
             }
@@ -104,10 +107,12 @@ public class SUBSCRIBE extends MessageSupport.HeaderBase implements MessageSuppo
         return super.qos();
     }
 
+    @Override
     public short messageId() {
         return messageId;
     }
 
+    @Override
     public SUBSCRIBE messageId(short messageId) {
         this.messageId = messageId;
         return this;
@@ -125,10 +130,10 @@ public class SUBSCRIBE extends MessageSupport.HeaderBase implements MessageSuppo
     @Override
     public String toString() {
         return "SUBSCRIBE{" +
-                "dup=" + dup() +
-                ", qos=" + qos() +
-                ", messageId=" + messageId +
-                ", topics=" + (topics == null ? null : Arrays.asList(topics)) +
-                '}';
+            "dup=" + dup() +
+            ", qos=" + qos() +
+            ", messageId=" + messageId +
+            ", topics=" + (topics == null ? null : Arrays.asList(topics)) +
+            '}';
     }
 }

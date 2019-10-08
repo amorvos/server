@@ -1,14 +1,14 @@
 /**
  * Copyright (C) 2010-2012, FuseSource Corp.  All rights reserved.
- *
- *     http://fusesource.com
- *
+ * <p>
+ * http://fusesource.com
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,7 +33,7 @@ public class Message {
 
     private final UTF8Buffer topic;
     private final Buffer payload;
-    private Callback<Callback<byte[]>>  onComplete;
+    private Callback<Callback<byte[]>> onComplete;
     private final DispatchQueue queue;
     boolean blocking = false;
 
@@ -51,6 +51,7 @@ public class Message {
     /**
      * Using getPayloadBuffer() is lower overhead version of getPayload()
      * since it avoids a byte array copy.
+     *
      * @return
      */
     public Buffer getPayloadBuffer() {
@@ -64,6 +65,7 @@ public class Message {
     /**
      * Using getTopicBuffer is lower overhead version of getTopic()
      * since it avoid doing UTF-8 decode.
+     *
      * @return
      */
     public UTF8Buffer getTopicBuffer() {
@@ -71,7 +73,7 @@ public class Message {
     }
 
     public void ack() {
-        if( blocking ) {
+        if (blocking) {
             final Promise<byte[]> future = new Promise<byte[]>();
             ack(future);
             try {
@@ -85,9 +87,10 @@ public class Message {
     }
 
     public void ack(final Callback<byte[]> onAcked) {
-        if(onComplete!=null) {
+        if (onComplete != null) {
             queue.execute(new Task() {
                 Callback<Callback<byte[]>> onCompleteCopy = onComplete;
+
                 @Override
                 public void run() {
                     onCompleteCopy.onSuccess(onAcked);
@@ -95,7 +98,7 @@ public class Message {
             });
             onComplete = null;
         } else {
-            if( onAcked!=null ) {
+            if (onAcked != null) {
                 onAcked.onSuccess(null);
             }
         }

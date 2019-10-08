@@ -8,10 +8,10 @@
 
 package io.moquette.imhandler;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.WFCMessage;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 import java.util.List;
@@ -20,11 +20,11 @@ import java.util.List;
 public class GetGroupInfoHandler extends IMHandler<WFCMessage.PullUserRequest> {
     @Override
     public ErrorCode action(ByteBuf ackPayload, String clientID, String fromUser, boolean isAdmin, WFCMessage.PullUserRequest request, Qos1PublishHandler.IMCallback callback) {
-            List<WFCMessage.GroupInfo> infos = m_messagesStore.getGroupInfos(request.getRequestList());
+        List<WFCMessage.GroupInfo> infos = m_messagesStore.getGroupInfos(request.getRequestList());
 
-            WFCMessage.PullGroupInfoResult result = WFCMessage.PullGroupInfoResult.newBuilder().addAllInfo(infos).build();
-            byte[] data = result.toByteArray();
-            ackPayload.ensureWritable(data.length).writeBytes(data);
-            return ErrorCode.ERROR_CODE_SUCCESS;
+        WFCMessage.PullGroupInfoResult result = WFCMessage.PullGroupInfoResult.newBuilder().addAllInfo(infos).build();
+        byte[] data = result.toByteArray();
+        ackPayload.ensureWritable(data.length).writeBytes(data);
+        return ErrorCode.ERROR_CODE_SUCCESS;
     }
 }

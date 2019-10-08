@@ -8,10 +8,10 @@
 
 package io.moquette.imhandler;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.WFCMessage;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 @Handler(IMTopic.ChannelPullTopic)
@@ -22,7 +22,7 @@ public class GetChannelInfoHandler extends IMHandler<WFCMessage.PullChannelInfo>
         WFCMessage.ChannelInfo info = m_messagesStore.getChannelInfo(request.getChannelId());
         if (info == null) {
             errorCode = ErrorCode.ERROR_CODE_NOT_EXIST;
-        } else if(info.getUpdateDt() <= request.getHead()) {
+        } else if (info.getUpdateDt() <= request.getHead()) {
             errorCode = ErrorCode.ERROR_CODE_NOT_MODIFIED;
         } else {
             if (!info.getOwner().equals(fromUser)) {

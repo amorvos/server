@@ -18,13 +18,18 @@ package io.moquette.spi.impl.security;
 
 import io.moquette.spi.impl.subscriptions.Topic;
 import io.moquette.spi.security.IAuthorizator;
+
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Used by the ACLFileParser to push all authorizations it finds. ACLAuthorizator uses it in read
  * mode to check it topics matches the ACLs.
- *
+ * <p>
  * Not thread safe.
  */
 class AuthorizationsCollector implements IAuthorizator {

@@ -2,6 +2,7 @@ package com.xiaoleilu.loServer;
 
 import com.xiaoleilu.hutool.util.DateUtil;
 import com.xiaoleilu.loServer.action.Action;
+import com.xiaoleilu.loServer.action.ClassUtil;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.AdminActionHandler;
 import com.xiaoleilu.loServer.handler.IMActionHandler;
@@ -19,7 +20,6 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import com.xiaoleilu.loServer.action.ClassUtil;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -29,12 +29,12 @@ import java.io.IOException;
  * 用于启动服务器的主对象<br>
  * 使用LoServer.start()启动服务器<br>
  * 服务的Action类和端口等设置在ServerSetting中设置
- * @author Looly
  *
+ * @author Looly
  */
 public class LoServer {
     private static final org.slf4j.Logger Logger = LoggerFactory.getLogger(LoServer.class);
-	private int port;
+    private int port;
     private int adminPort;
     private IMessagesStore messagesStore;
     private ISessionsStore sessionsStore;
@@ -49,29 +49,28 @@ public class LoServer {
     }
 
     /**
-	 * 启动服务
-	 * @throws InterruptedException 
-	 */
-	public void start() throws InterruptedException {
-		long start = System.currentTimeMillis();
-		
-		// Configure the server.
-		final EventLoopGroup bossGroup = new NioEventLoopGroup(2);
-		final EventLoopGroup workerGroup = new NioEventLoopGroup();
+     * 启动服务
+     */
+    public void start() throws InterruptedException {
+        long start = System.currentTimeMillis();
+
+        // Configure the server.
+        final EventLoopGroup bossGroup = new NioEventLoopGroup(2);
+        final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
         registerAllAction();
 
-		try {
-			final ServerBootstrap b = new ServerBootstrap();
-            final ServerBootstrap adminB = new ServerBootstrap();
-			b.group(bossGroup, workerGroup)
+        try {
+            final ServerBootstrap serverBootstrap = new ServerBootstrap();
+            final ServerBootstrap adminServerBootstrap = new ServerBootstrap();
+            serverBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 10240) // 服务端可连接队列大小
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.SO_REUSEADDR, true)
                 .childOption(ChannelOption.TCP_NODELAY, true)
-                .childOption(ChannelOption.SO_SNDBUF, 1024*64)
-                .childOption(ChannelOption.SO_RCVBUF, 1024*64)
+                .childOption(ChannelOption.SO_SNDBUF, 1024 * 64)
+                .childOption(ChannelOption.SO_RCVBUF, 1024 * 64)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -80,20 +79,20 @@ public class LoServer {
                         socketChannel.pipeline().addLast(new ChunkedWriteHandler());
                         socketChannel.pipeline().addLast(new HttpObjectAggregator(100 * 1024 * 1024));
                         socketChannel.pipeline().addLast(new IMActionHandler(messagesStore, sessionsStore));
-					}
-				});
-			
-			channel = b.bind(port).sync().channel();
+                    }
+                });
+
+            channel = serverBootstrap.bind(port).sync().channel();
 
 
-            adminB.group(bossGroup, workerGroup)
+            adminServerBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 10240) // 服务端可连接队列大小
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.SO_REUSEADDR, true)
                 .childOption(ChannelOption.TCP_NODELAY, true)
-                .childOption(ChannelOption.SO_SNDBUF, 1024*64)
-                .childOption(ChannelOption.SO_RCVBUF, 1024*64)
+                .childOption(ChannelOption.SO_SNDBUF, 1024 * 64)
+                .childOption(ChannelOption.SO_RCVBUF, 1024 * 64)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -105,14 +104,15 @@ public class LoServer {
                     }
                 });
 
-            adminChannel = adminB.bind(adminPort).sync().channel();
-			Logger.info("***** Welcome To LoServer on port [{},{}], startting spend {}ms *****", port, adminPort, DateUtil.spendMs(start));
-		} finally {
+            adminChannel = adminServerBootstrap.bind(adminPort).sync().channel();
+            Logger.info("***** Welcome To LoServer on port [{},{}], startting spend {}ms *****", port, adminPort, DateUtil.spendMs(start));
+        } finally {
 
-		}
-	}
+        }
+    }
+
     public void shutdown() {
-        if (this.channel!= null) {
+        if (this.channel != null) {
             this.channel.close();
             try {
                 this.channel.closeFuture().sync();
@@ -133,15 +133,12 @@ public class LoServer {
 
     private void registerAllAction() {
         try {
-            for (Class cls:ClassUtil.getAllAssignedClass(Action.class)
-                 ) {
-                if(cls.getAnnotation(Route.class) != null) {
-                    ServerSetting.setAction((Class<? extends Action>)cls);
+            for (Class cls : ClassUtil.getAllAssignedClass(Action.class)) {
+                if (cls.getAnnotation(Route.class) != null) {
+                    ServerSetting.setAction((Class<? extends Action>) cls);
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }

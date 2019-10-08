@@ -34,7 +34,7 @@ public final class BrokerConstants {
     public static final String NODE_IDS = "node_ids";
     public static final String DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME = "moquette_store.mapdb";
     public static final String DEFAULT_PERSISTENT_PATH = System.getProperty("user.dir") + File.separator
-            + DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME;
+        + DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME;
     public static final String WEB_SOCKET_PORT_PROPERTY_NAME = "websocket_port";
     public static final String WSS_PORT_PROPERTY_NAME = "secure_websocket_port";
     public static final String SSL_PORT_PROPERTY_NAME = "ssl_port";
@@ -63,23 +63,23 @@ public final class BrokerConstants {
 
     public static final String STORAGE_CLASS_NAME = "storage_class";
 
-    public static final String QINIU_SERVER_URL= "qiniu.server_url";
-	public static final String QINIU_ACCESS_KEY = "qiniu.access_key";
-	public static final String QINIU_SECRET_KEY = "qiniu.secret_key";
+    public static final String QINIU_SERVER_URL = "qiniu.server_url";
+    public static final String QINIU_ACCESS_KEY = "qiniu.access_key";
+    public static final String QINIU_SECRET_KEY = "qiniu.secret_key";
 
-    public static final String QINIU_BUCKET_GENERAL_NAME= "qiniu.bucket_general_name";
+    public static final String QINIU_BUCKET_GENERAL_NAME = "qiniu.bucket_general_name";
     public static final String QINIU_BUCKET_GENERAL_DOMAIN = "qiniu.bucket_general_domain";
-    public static final String QINIU_BUCKET_IMAGE_NAME= "qiniu.bucket_image_name";
+    public static final String QINIU_BUCKET_IMAGE_NAME = "qiniu.bucket_image_name";
     public static final String QINIU_BUCKET_IMAGE_DOMAIN = "qiniu.bucket_image_domain";
-    public static final String QINIU_BUCKET_VOICE_NAME= "qiniu.bucket_voice_name";
+    public static final String QINIU_BUCKET_VOICE_NAME = "qiniu.bucket_voice_name";
     public static final String QINIU_BUCKET_VOICE_DOMAIN = "qiniu.bucket_voice_domain";
-    public static final String QINIU_BUCKET_VIDEO_NAME= "qiniu.bucket_video_name";
+    public static final String QINIU_BUCKET_VIDEO_NAME = "qiniu.bucket_video_name";
     public static final String QINIU_BUCKET_VIDEO_DOMAIN = "qiniu.bucket_video_domain";
-    public static final String QINIU_BUCKET_FILE_NAME= "qiniu.bucket_file_name";
+    public static final String QINIU_BUCKET_FILE_NAME = "qiniu.bucket_file_name";
     public static final String QINIU_BUCKET_FILE_DOMAIN = "qiniu.bucket_file_domain";
-    public static final String QINIU_BUCKET_PORTRAIT_NAME= "qiniu.bucket_portrait_name";
+    public static final String QINIU_BUCKET_PORTRAIT_NAME = "qiniu.bucket_portrait_name";
     public static final String QINIU_BUCKET_PORTRAIT_DOMAIN = "qiniu.bucket_portrait_domain";
-    public static final String QINIU_BUCKET_FAVORITE_NAME= "qiniu.bucket_favorite_name";
+    public static final String QINIU_BUCKET_FAVORITE_NAME = "qiniu.bucket_favorite_name";
     public static final String QINIU_BUCKET_FAVORITE_DOMAIN = "qiniu.bucket_favorite_domain";
 
     public static final String FILE_STORAGE_ROOT = "local.media.storage.root";

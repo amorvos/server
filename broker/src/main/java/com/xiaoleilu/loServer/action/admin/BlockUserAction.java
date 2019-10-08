@@ -9,23 +9,23 @@
 package com.xiaoleilu.loServer.action.admin;
 
 import cn.wildfirechat.common.APIPath;
+import cn.wildfirechat.common.ErrorCode;
+import cn.wildfirechat.pojos.InputOutputUserBlockStatus;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import cn.wildfirechat.pojos.InputOutputUserBlockStatus;
 import io.moquette.persistence.RPCCenter;
 import io.moquette.persistence.TargetEntry;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
-import cn.wildfirechat.common.ErrorCode;
 
 @Route(APIPath.User_Update_Block_Status)
 @HttpMethod("POST")
-public class BlockUserAction extends AdminAction {
+public class BlockUserAction extends AbstractAdminAction {
 
     @Override
     public boolean isTransactionAction() {

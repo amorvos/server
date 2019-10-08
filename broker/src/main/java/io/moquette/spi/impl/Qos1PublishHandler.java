@@ -16,41 +16,24 @@
 
 package io.moquette.spi.impl;
 
-import static io.moquette.spi.impl.Utils.readBytesAndRewind;
-import static io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader.from;
-import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
-import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_NOT_IMPLEMENT;
-import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_OVER_FREQUENCY;
-import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.*;
-import java.util.zip.GZIPOutputStream;
-
+import cn.wildfirechat.common.ErrorCode;
+import cn.wildfirechat.pojos.OutputCheckUserOnline;
 import cn.wildfirechat.server.ThreadPoolExecutorWrapper;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.action.ClassUtil;
-import cn.wildfirechat.pojos.OutputCheckUserOnline;
-import io.moquette.persistence.RPCCenter;
 import io.moquette.imhandler.Handler;
 import io.moquette.imhandler.IMHandler;
 import io.moquette.persistence.MemorySessionStore;
+import io.moquette.persistence.RPCCenter;
 import io.moquette.server.ConnectionDescriptor;
-import io.moquette.server.Server;
-import io.moquette.spi.ClientSession;
-import io.moquette.spi.impl.security.AES;
-import io.netty.handler.codec.mqtt.MqttVersion;
-import io.netty.util.ReferenceCountUtil;
-import io.netty.util.internal.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.moquette.server.ConnectionDescriptorStore;
+import io.moquette.server.Server;
 import io.moquette.server.netty.NettyUtils;
+import io.moquette.spi.ClientSession;
 import io.moquette.spi.IMessagesStore;
 import io.moquette.spi.ISessionsStore;
+import io.moquette.spi.impl.security.AES;
 import io.moquette.spi.impl.subscriptions.Topic;
 import io.moquette.spi.security.IAuthorizator;
 import io.netty.buffer.ByteBuf;
@@ -59,11 +42,27 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
-import cn.wildfirechat.common.ErrorCode;
+import io.netty.handler.codec.mqtt.MqttVersion;
+import io.netty.util.ReferenceCountUtil;
+import io.netty.util.internal.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import win.liyufan.im.IMTopic;
 import win.liyufan.im.RateLimiter;
 import win.liyufan.im.Utility;
 import win.liyufan.im.extended.mqttmessage.ModifiedMqttPubAckMessage;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.zip.GZIPOutputStream;
+
+import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_NOT_IMPLEMENT;
+import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_OVER_FREQUENCY;
+import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
+import static io.moquette.spi.impl.Utils.readBytesAndRewind;
+import static io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader.from;
+import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
 
 public class Qos1PublishHandler extends QosPublishHandler {
     private static final Logger LOG = LoggerFactory.getLogger(Qos1PublishHandler.class);
@@ -92,9 +91,9 @@ public class Qos1PublishHandler extends QosPublishHandler {
 
     private void registerAllAction() {
         try {
-            for (Class cls:ClassUtil.getAllAssignedClass(IMHandler.class)) {
-                Handler annotation = (Handler)cls.getAnnotation(Handler.class);
-                if(annotation != null) {
+            for (Class cls : ClassUtil.getAllAssignedClass(IMHandler.class)) {
+                Handler annotation = (Handler) cls.getAnnotation(Handler.class);
+                if (annotation != null) {
                     IMHandler handler = (IMHandler) com.xiaoleilu.hutool.util.ClassUtil.newInstance(cls);
                     m_imHandlers.put(annotation.value(), handler);
                 }
@@ -148,9 +147,9 @@ public class Qos1PublishHandler extends QosPublishHandler {
         });
     }
 
-	void imHandler(String clientID, String fromUser, String topic, byte[] payloadContent, IMCallback callback, boolean isAdmin) {
+    void imHandler(String clientID, String fromUser, String topic, byte[] payloadContent, IMCallback callback, boolean isAdmin) {
         LOG.info("imHandler fromUser={}, topic={}", fromUser, topic);
-        if(!mLimitCounter.isGranted(clientID + fromUser + topic)) {
+        if (!mLimitCounter.isGranted(clientID + fromUser + topic)) {
             ByteBuf ackPayload = Unpooled.buffer();
             ackPayload.ensureWritable(1).writeByte(ERROR_CODE_OVER_FREQUENCY.getCode());
             try {
@@ -166,7 +165,7 @@ public class Qos1PublishHandler extends QosPublishHandler {
         IMCallback wrapper = (errorcode, ackPayload) -> {
             ackPayload.resetReaderIndex();
             byte code = ackPayload.readByte();
-            if(ackPayload.readableBytes() > 0) {
+            if (ackPayload.readableBytes() > 0) {
                 byte[] data = new byte[ackPayload.readableBytes()];
                 ackPayload.getBytes(1, data);
                 try {
@@ -178,7 +177,7 @@ public class Qos1PublishHandler extends QosPublishHandler {
                         } else {
                             MemorySessionStore.Session session = m_sessionStore.getSession(clientID);
                             if (session != null && session.getUsername().equals(fromUser)) {
-                                if (data.length > 7*1024 && session.getMqttVersion() == MqttVersion.Wildfire_1) {
+                                if (data.length > 7 * 1024 && session.getMqttVersion() == MqttVersion.Wildfire_1) {
                                     ByteArrayOutputStream out = new ByteArrayOutputStream();
                                     GZIPOutputStream gzip;
                                     try {
@@ -189,7 +188,7 @@ public class Qos1PublishHandler extends QosPublishHandler {
                                         e.printStackTrace();
                                     }
                                     data = out.toByteArray();
-                                    code = (byte)ErrorCode.ERROR_CODE_SUCCESS_GZIPED.code;
+                                    code = (byte) ErrorCode.ERROR_CODE_SUCCESS_GZIPED.code;
                                 }
 
                                 data = AES.AESEncrypt(data, session.getSecret());

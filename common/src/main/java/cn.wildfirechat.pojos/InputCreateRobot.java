@@ -44,16 +44,21 @@ public class InputCreateRobot {
 
     public WFCMessage.Robot toRobot() {
         WFCMessage.Robot.Builder builder = WFCMessage.Robot.newBuilder();
-        if (!StringUtil.isNullOrEmpty(userId))
+        if (!StringUtil.isNullOrEmpty(userId)) {
             builder.setUid(userId);
-        if (!StringUtil.isNullOrEmpty(owner))
-        builder.setOwner(owner);
-        if (!StringUtil.isNullOrEmpty(secret))
-        builder.setSecret(secret);
-        if (!StringUtil.isNullOrEmpty(callback))
-        builder.setCallback(callback);
-        if (!StringUtil.isNullOrEmpty(robotExtra))
-        builder.setExtra(robotExtra);
+        }
+        if (!StringUtil.isNullOrEmpty(owner)) {
+            builder.setOwner(owner);
+        }
+        if (!StringUtil.isNullOrEmpty(secret)) {
+            builder.setSecret(secret);
+        }
+        if (!StringUtil.isNullOrEmpty(callback)) {
+            builder.setCallback(callback);
+        }
+        if (!StringUtil.isNullOrEmpty(robotExtra)) {
+            builder.setExtra(robotExtra);
+        }
         builder.setState(0);
         return builder.build();
     }
@@ -61,25 +66,34 @@ public class InputCreateRobot {
     public WFCMessage.User toUser() {
         WFCMessage.User.Builder newUserBuilder = WFCMessage.User.newBuilder()
             .setUid(userId);
-        if (name != null)
+        if (name != null) {
             newUserBuilder.setName(name);
-        if (displayName != null)
+        }
+        if (displayName != null) {
             newUserBuilder.setDisplayName(displayName);
-        if (getPortrait() != null)
+        }
+        if (getPortrait() != null) {
             newUserBuilder.setPortrait(getPortrait());
-        if (getEmail() != null)
+        }
+        if (getEmail() != null) {
             newUserBuilder.setEmail(getEmail());
-        if (getAddress() != null)
+        }
+        if (getAddress() != null) {
             newUserBuilder.setAddress(getAddress());
-        if (getCompany() != null)
+        }
+        if (getCompany() != null) {
             newUserBuilder.setCompany(getCompany());
-        if (getSocial() != null)
+        }
+        if (getSocial() != null) {
             newUserBuilder.setSocial(getSocial());
+        }
 
-        if (getMobile() != null)
+        if (getMobile() != null) {
             newUserBuilder.setMobile(getMobile());
-        if (getExtra() != null)
+        }
+        if (getExtra() != null) {
             newUserBuilder.setExtra(getExtra());
+        }
         newUserBuilder.setType(ProtoConstants.UserType.UserType_Robot);
         newUserBuilder.setGender(gender);
 
