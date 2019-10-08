@@ -49,6 +49,7 @@ import io.moquette.spi.security.IAuthorizator;
 import io.moquette.spi.security.ISslContextCreator;
 import io.moquette.spi.security.Tokenor;
 import io.netty.util.ResourceLeakDetector;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import win.liyufan.im.DBUtil;
@@ -58,8 +59,10 @@ import win.liyufan.im.Utility;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
@@ -164,7 +167,11 @@ public class Server {
     }
 
     private static File defaultConfigFile() {
-        String defaultPath = Server.class.getResource("/").getPath();
+        URL resource = Server.class.getResource("/");
+        String defaultPath = StringUtils.EMPTY;
+        if (Objects.nonNull(resource)) {
+            defaultPath = resource.getPath();
+        }
         String configPath = System.getProperty("wildfirechat.path", defaultPath);
         return new File(configPath, IConfig.DEFAULT_CONFIG);
     }
